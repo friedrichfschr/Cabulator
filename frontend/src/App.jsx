@@ -45,14 +45,16 @@ const App = () => {
 
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
 
-        <Route pat h="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
         <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
         <Route path="/messages" element={authUser ? <MessagesPage /> : <Navigate to="/login" />} />
         <Route path="/flashcards" element={authUser ? <FlashcardsPage /> : <Navigate to="/login" />} />
         <Route path="/reader" element={authUser ? <ReaderPage /> : <Navigate to="/login" />} />
 
       </Routes>
-      <Toaster />
+      <Toaster
+
+      />
     </div >
   )
 }
