@@ -10,14 +10,19 @@ import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
 import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
+import MessagesPage from "./pages/MessagesPage"
+import FlashcardsPage from "./pages/FlashcardsPage"
+import ReaderPage from './pages/ReaderPage'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 
 
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore()
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore()
   const { theme } = useThemeStore()
+
+  console.log(onlineUsers)
 
   useEffect(() => {
     checkAuth()
@@ -35,11 +40,17 @@ const App = () => {
       <Navbar />
 
       <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+
+        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+
+        <Route pat h="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
         <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/messages" element={authUser ? <MessagesPage /> : <Navigate to="/login" />} />
+        <Route path="/flashcards" element={authUser ? <FlashcardsPage /> : <Navigate to="/login" />} />
+        <Route path="/reader" element={authUser ? <ReaderPage /> : <Navigate to="/login" />} />
+
       </Routes>
       <Toaster />
     </div >

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
+import { useAuthStore } from "./useAuthStore"
 
 export const useChatStore = create((set, get) => (
     {
@@ -43,8 +44,33 @@ export const useChatStore = create((set, get) => (
             }
         },
 
-        // todo: optimize this one later
+        subscribeToMessages: () => {
+            const { selectedUser } = get();
+            if (!selectedUser) return;
+
+            const socket = useAuthStore.getState().socket;
+
+
+            socket.on("newMessage", (newMessage) => {
+
+                // check if the user is selected at the moment they send a message
+                // otherwise the message would appear in the wrong chat temporarily until page is refreshed
+                if (newMessage.senderId !== selectedUser._id) return;
+
+                set({
+                    messages: [...get().messages, newMessage],
+                })
+            })
+        },
+
+        unsubscribeFromMessages: () => {
+            const socket = useAuthStore.getState().socket
+            socket.off("newMessage")
+        },
+
         setSelectedUser: (selectedUser) => set({ selectedUser }),
+
+
 
 
     }
