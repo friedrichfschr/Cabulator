@@ -81,7 +81,7 @@ const ChatContainer = () => {
 
             </div>
 
-            <div className=' bg-gray-100 mt-1'>
+            <div className='  mt-1'>
                 <MessageInput />
             </div>
 
