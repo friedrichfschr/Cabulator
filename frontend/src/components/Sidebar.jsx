@@ -23,12 +23,12 @@ const Sidebar = () => {
 
     return (
         <div >
-            <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+            <aside className="h-full w-100 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
                 <div className='border-b border-base-300 w-full p-5'>
                     <Users className='size-6' />
-                    <span className='font-medium hidden lg:block'>Contacts</span>
+                    <span className='font-medium block'>Contacts</span>
                 </div>
-                <div className="ml-3 mt-3 hidden lg:flex items-center gap-2">
+                <div className="ml-3 mt-3 flex items-center gap-2">
                     <label className="cursor-pointer flex items-center gap-2">
                         <input
                             type="checkbox"
@@ -52,7 +52,7 @@ const Sidebar = () => {
               ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}
             `}
                         >
-                            <div className="hidden lg:block relative mx-auto lg:mx-0">
+                            <div className=" block relative ">
                                 <img
                                     src={user.profilePic || "/avatar.png"}
                                     alt={user.name}

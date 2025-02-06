@@ -5,14 +5,17 @@ import { Toaster } from "react-hot-toast"
 
 import Navbar from './components/Navbar'
 
+import SignUpPage from './pages/auth/SignUpPage'
+import LoginPage from './pages/auth/LoginPage'
+
 import HomePage from './pages/HomePage'
-import SignUpPage from './pages/SignUpPage'
-import LoginPage from './pages/LoginPage'
 import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
-import MessagesPage from "./pages/MessagesPage"
-import FlashcardsPage from "./pages/FlashcardsPage"
-import ReaderPage from './pages/ReaderPage'
+
+import MessagesPage from "./pages/tools/MessagesPage"
+import FlashcardsPage from "./pages/tools/FlashcardsPage"
+import ReaderPage from './pages/tools/ReaderPage'
+
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 
