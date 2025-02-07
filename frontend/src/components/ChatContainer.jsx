@@ -37,7 +37,7 @@ const ChatContainer = () => {
 
     return (
         <div className='flex flex-col h-screen  '>
-            <div className='mt-30'>
+            <div className='mt-30 max-[450px]:mt-54'>
                 {/*  max-[450px]:mt-54 */}
                 <ChatHeader />
             </div>
