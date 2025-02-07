@@ -39,7 +39,7 @@ const App = () => {
   )
 
   return (
-    <div style={{ height: "100vh", overflow: "auto" }} data-theme={theme}>
+    <div style={{ height: "100dvh", overflow: "auto" }} data-theme={theme}>
       <Navbar />
 
       <Routes>
