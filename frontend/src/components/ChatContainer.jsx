@@ -36,12 +36,12 @@ const ChatContainer = () => {
     }
 
     return (
-        <div className='flex flex-col h-screen '>
-            <div className='mt-30'>
+        <div className='flex flex-col h-screen  '>
+            <div className='mt-43'>
                 <ChatHeader />
             </div>
 
-            <div className='flex-1 overflow-y-auto space-y-4 '>
+            <div className='flex-1 overflow-y-auto space-y-4'>
                 {messages.map((message) => (
                     <div
                         key={message._id}
@@ -81,7 +81,7 @@ const ChatContainer = () => {
 
             </div>
 
-            <div className='  mt-1'>
+            <div className='  mt-2'>
                 <MessageInput />
             </div>
 

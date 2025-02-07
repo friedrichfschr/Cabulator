@@ -11,7 +11,7 @@ const Navbar = () => {
     return (
         <header
             className=" border-b border-base-300 fixed w-full top-0 z-40 
-    backdrop-blur-lg bg-base-100/80 overflow-visible"
+    backdrop-blur-lg bg-base-100/80"
         >
             <div className='container mx-auto px-4 h-16'>
                 <div className='flex items-center justify-between h-full'>
@@ -46,11 +46,11 @@ const Navbar = () => {
                                 btn btn-sm gap-2 transition-colors`}>
 
                                     <Settings className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Settings</span>
+
                                 </Link>
                                 <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                                     <User className="size-5" />
-                                    <span className="hidden sm:inline">Profile</span>
+
                                 </Link>
 
                                 <button className="flex gap-2 items-center" onClick={logout}>
