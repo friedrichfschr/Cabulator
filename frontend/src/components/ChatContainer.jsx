@@ -37,7 +37,7 @@ const ChatContainer = () => {
 
     return (
         <div className='flex flex-col h-screen  '>
-            <div className='mt-43'>
+            <div className='mt-30 max-[450px]:mt-54'>
                 <ChatHeader />
             </div>
 
@@ -66,12 +66,12 @@ const ChatContainer = () => {
                                 {formatMessageTime(message.createdAt)}
                             </time>
                         </div>
-                        <div className="chat-bubble flex flex-col">
+                        <div className="chat-bubble flex flex-col xs:text-amber-400">
                             {message.image && (
                                 <img
                                     src={message.image}
                                     alt="Attachment"
-                                    className="sm:max-w-[200px] rounded-md mb-2"
+                                    className="max-w-[200px] rounded-md mb-2"
                                 />
                             )}
                             {message.text && <p>{message.text}</p>}
