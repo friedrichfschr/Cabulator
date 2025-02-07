@@ -19,6 +19,9 @@ const userSChema = new mongoose.Schema(
             type: String,
             default: "",
         },
+        contacts: {
+            type: [mongoose.Schema.Types.ObjectId]
+        }
     },
     { timestamps: true }
 );

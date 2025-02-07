@@ -17,6 +17,17 @@ export const getUserForSidebar = async (req, res) => {
     }
 };
 
+export const newContact = async (req, res) => {
+    try {
+        const loggedInUserID = req.user._id
+        const user = User.findById(loggedInUserID)
+
+
+    } catch (error) {
+
+    }
+}
+
 export const getMessages = async (req, res) => {
     try {
         const { id: userToChatId } = req.params
