@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import bodyParser from "body-parser";
 
 import path from "path";
 
@@ -13,6 +14,13 @@ import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import flashcardRoutes from "./routes/flashcard.route.js"
 import deckRoutes from "./routes/deck.route.js"
+
+
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 
 dotenv.config();
 
@@ -28,6 +36,8 @@ app.use(
     })
 );
 
+
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/decks", deckRoutes)
@@ -40,6 +50,8 @@ if (process.env.NODE_ENV === "production") {
         res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
     });
 }
+
+
 
 server.listen(PORT, () => {
     console.log("server is running on PORT:" + PORT);

@@ -27,7 +27,7 @@ const ChatContainer = () => {
 
     if (isMessagesLoading) {
         return (
-            <div className='flex-1 flex flex-col overflow-auto'>
+            <div className='flex flex-col h-full'>
                 <ChatHeader />
                 <MessageSkeleton />
                 <MessageInput />
@@ -73,7 +73,7 @@ const ChatContainer = () => {
                                     <img
                                         src={message.image}
                                         alt="Attachment"
-                                        className="max-w-[200px] rounded-md mb-2"
+                                        className="min-w-60 max-w-100 rounded-md mb-1 mt-1 object-contain"
                                     />
                                 )}
 

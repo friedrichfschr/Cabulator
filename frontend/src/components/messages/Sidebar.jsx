@@ -24,7 +24,7 @@ const Sidebar = () => {
     return (
         <div >
 
-            <aside className="h-full w-100 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+            <aside className="h-full w-72 border-r border-base-300 flex flex-col transition-all duration-200">
                 <div className='border-b border-base-300 w-full p-5 flex justify-between items-center'>
                     <div>
                         <Users className='size-6' />
@@ -56,7 +56,7 @@ const Sidebar = () => {
                                 onClick={() => setSelectedContact(contact)}
                                 className={`
               w-full p-3 flex items-center gap-3
-              hover:bg-base-300 transition-colors
+              hover:bg-base-300 transition-colors rounded-xl
               ${selectedContact?._id === contact._id ? "bg-base-300 ring-1 ring-base-300" : ""}
             `}
                             >

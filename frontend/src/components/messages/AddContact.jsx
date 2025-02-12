@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Loader, Search, UserPlus } from 'lucide-react';
+import { Loader, Search, UserPlus, X } from 'lucide-react';
 import { useChatStore } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -25,9 +25,6 @@ const AddContact = () => {
 
     }
 
-
-
-
     return (
         <div className='p-5'>
             <button className="btn" onClick={() => document.getElementById('addContactId').showModal()}>Add Contact</button>
@@ -35,15 +32,15 @@ const AddContact = () => {
                 <div className="modal-box">
                     <form method="dialog" >
                         {/* if there is a button in form, it will close the modal */}
-                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 ">✕</button>
+                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 size-"><X size={18}></X></button>
                     </form>
                     <h3 className="font-bold text-lg">Users</h3>
 
 
-                    <form className='flex items-center gap-2 mt-4' onSubmit={handleFormSubmit}>
+                    <form className='flex items-center gap-2 mt-4 m-2' onSubmit={handleFormSubmit}>
                         <input type="text"
 
-                            className='input input-bordered rounded-lg input-sm'
+                            className='input input-bordered rounded-lg input-sm grow'
                             placeholder='search users...'
                             value={text}
                             onChange={(e) => setText(e.target.value)}
@@ -51,7 +48,7 @@ const AddContact = () => {
 
                         <button type='button'
 
-                            className="btn btn-sm btn-circle"
+                            className="btn btn-sm btn-circle m-2"
                             disabled={!text.trim()}
                             onClick={handleSearch}
                         >
@@ -63,9 +60,9 @@ const AddContact = () => {
                         <div className="flex items-center justify-center h-120">
                             <Loader className="size-10 animate-spin"></Loader>
                         </div> :
-                        <div className='mt-2 overflow-y-auto w-full py-3 h-120'>
+                        <div className='mt-2 overflow-y-auto w-full py-3 h-120 '>
                             {shownUsers.map((user) => (
-                                <div key={user._id} className='flex items-center gap-3 hover:bg-base-300 transition-colors p-3'>
+                                <div key={user._id} className='flex items-center gap-3 hover:bg-base-300 transition-colors p-3 rounded-xl'>
                                     <div className=" block relative ">
                                         <img
                                             src={user.profilePic || "/avatar.png"}
@@ -93,8 +90,8 @@ const AddContact = () => {
                                 </div>
 
                             ))}
-                            {shownUsers.length > 0 &&
-                                <div className='justify-self-center mt-5'>
+                            {shownUsers.length == 0 &&
+                                <div className='justify-self-center mt-5 text-zinc-500'>
                                     No users found
                                 </div>
                             }
@@ -104,7 +101,7 @@ const AddContact = () => {
 
                 </div>
                 <form method="dialog" className="modal-backdrop">
-                    <button>close</button>
+                    <button >close</button>
                 </form>
             </dialog >
         </div >
