@@ -29,7 +29,7 @@ const AddContact = () => {
         <div className='p-5'>
             <button className="btn" onClick={() => document.getElementById('addContactId').showModal()}>Add Contact</button>
             <dialog id="addContactId" className="modal">
-                <div className="modal-box">
+                <div className="modal-box ">
                     <form method="dialog" >
                         {/* if there is a button in form, it will close the modal */}
                         <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 size-"><X size={18}></X></button>
@@ -60,7 +60,7 @@ const AddContact = () => {
                         <div className="flex items-center justify-center h-120">
                             <Loader className="size-10 animate-spin"></Loader>
                         </div> :
-                        <div className='mt-2 overflow-y-auto w-full py-3 h-120 '>
+                        <div className='mt-2 overflow-y-auto w-full py-3 h-120 justify-center'>
                             {shownUsers.map((user) => (
                                 <div key={user._id} className='flex items-center gap-3 hover:bg-base-300 transition-colors p-3 rounded-xl'>
                                     <div className=" block relative ">

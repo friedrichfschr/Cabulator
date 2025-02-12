@@ -43,7 +43,7 @@ const ChatContainer = () => {
             </div>
 
             {
-                messages.length > 0 ? <div className='flex-1 overflow-y-auto m-4 space-y-4'>
+                messages.length > 0 ? <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 space-y-4'>
                     {messages.map((message) => (
                         <div
                             key={message._id}
@@ -68,12 +68,12 @@ const ChatContainer = () => {
                                     {formatMessageTime(message.createdAt)}
                                 </time>
                             </div>
-                            <div className="chat-bubble flex flex-col ">
+                            <div className="chat-bubble flex flex-col max-w-120">
                                 {message.image && (
                                     <img
                                         src={message.image}
                                         alt="Attachment"
-                                        className="min-w-40 max-w-100 rounded-md mb-1 mt-1 object-contain"
+                                        className="min-w-40 max-w-120 max-h-90 rounded-md mb-1 mt-1 object-contain"
                                     />
                                 )}
 

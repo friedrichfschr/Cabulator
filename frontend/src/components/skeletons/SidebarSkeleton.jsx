@@ -6,7 +6,7 @@ const SidebarSkeleton = () => {
 
     return (
         <aside
-            className="h-full w-72 border-r border-base-300 
+            className="h-full grow-1 border-r border-base-300 
     flex flex-col transition-all duration-200"
         >
 
