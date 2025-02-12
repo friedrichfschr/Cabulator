@@ -21,7 +21,7 @@ const Navbar = () => {
                             <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <Earth className="w-5 h-5 text-primary" />
                             </div>
-                            <h1 className="text-lg font-bold">Cabulator</h1>
+                            <h1 className="max-[400px]:hidden text-lg font-bold">Cabulator</h1>
                         </Link>
                         <div className="dropdown dropdown-hover">
                             <div tabIndex={0} role="button" className="btn m-1">Tools</div>
