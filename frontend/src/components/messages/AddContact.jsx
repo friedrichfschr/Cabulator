@@ -93,7 +93,7 @@ const AddContact = () => {
                                 </div>
 
                             ))}
-                            {shownUsers &&
+                            {shownUsers.length > 0 &&
                                 <div className='justify-self-center mt-5'>
                                     No users found
                                 </div>
