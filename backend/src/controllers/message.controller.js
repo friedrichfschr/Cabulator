@@ -7,8 +7,12 @@ import User from "../models/user.model.js";
 
 export const getUserForSidebar = async (req, res) => {
     try {
-        const loggedInUserID = req.user._id
-        const filteredUsers = await User.find({ _id: { $ne: loggedInUserID } }).select("-password");
+        const loggedInUserId = req.user._id
+        const loggedInUser = await User.findById(loggedInUserId).select("contacts");
+
+        const filteredUsers = await User.find({
+            _id: { $ne: loggedInUserId, $nin: loggedInUser.contacts }
+        }).select("-password");
 
         res.status(200).json(filteredUsers)
     } catch (error) {
@@ -17,16 +21,6 @@ export const getUserForSidebar = async (req, res) => {
     }
 };
 
-export const newContact = async (req, res) => {
-    try {
-        const loggedInUserID = req.user._id
-        const user = User.findById(loggedInUserID)
-
-
-    } catch (error) {
-
-    }
-}
 
 export const getMessages = async (req, res) => {
     try {
@@ -81,3 +75,4 @@ export const sendMessage = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" })
     }
 };
+

@@ -4,6 +4,8 @@ import { Image, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const MessageInput = () => {
+
+
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
@@ -32,15 +34,20 @@ const MessageInput = () => {
         e.preventDefault()
         if (!text.trim() && !imagePreview) return;
         try {
-            await sendMessage({
-                text: text.trim(),
-                image: imagePreview,
-            });
-
-            // clear Form
+            // prevents sending the same message multiple times if enter or send button is pressed multiple times
+            const storeText = text
+            const storeImagePreview = imagePreview
             setText("")
             setImagePreview(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
+            await sendMessage({
+                text: storeText.trim(),
+                image: storeImagePreview,
+            });
+
+            // clear Form
+
+
         } catch {
             console.error("Failed to send message: ", error)
             toast.error("Failed to send message")
@@ -71,7 +78,7 @@ const MessageInput = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSendMessage} className='flex items-center gap-2'>
+            <form onSubmit={handleSendMessage} className='flex items-center gap-2' >
                 <div className='flex-1 flex gap-2'>
                     <input
                         type="text"
@@ -98,6 +105,7 @@ const MessageInput = () => {
                     </button>
                 </div>
                 <button
+
                     type="submit"
                     className="btn btn-sm btn-circle"
                     disabled={!text.trim() && !imagePreview}
@@ -106,7 +114,7 @@ const MessageInput = () => {
                 </button>
             </form>
 
-        </div>
+        </div >
     )
 }
 

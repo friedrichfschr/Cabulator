@@ -7,17 +7,17 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { formatMessageTime } from "../../lib/utils";
 
 const ChatContainer = () => {
-    const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages } = useChatStore()
+    const { messages, getMessages, isMessagesLoading, selectedContact, subscribeToMessages, unsubscribeFromMessages } = useChatStore()
     const { authUser } = useAuthStore();
 
     const messageEndRef = useRef(null);
 
     useEffect(() => {
-        getMessages(selectedUser._id);
+        getMessages(selectedContact._id);
         subscribeToMessages();
 
         return () => unsubscribeFromMessages();
-    }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+    }, [selectedContact._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
     useEffect(() => {
         if (messageEndRef.current && messages) {
@@ -56,7 +56,7 @@ const ChatContainer = () => {
                                         src={
                                             message.senderId === authUser._id
                                                 ? authUser.profilePic || "/avatar.png"
-                                                : selectedUser.profilePic || "/avatar.png"
+                                                : selectedContact.profilePic || "/avatar.png"
                                         }
                                         alt="profile pic"
                                     />

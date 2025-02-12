@@ -1,13 +1,14 @@
+import { log } from "console";
 import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 
 export const signup = async (req, res) => {
-    console.log(req.body)
-    const { fullName, email, password } = req.body;
+
+    const { Username, email, password } = req.body;
     try {
-        if (!fullName || !email || !password) {
+        if (!Username || !email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -16,13 +17,14 @@ export const signup = async (req, res) => {
         };
 
         const user = await User.findOne({ email });
-        if (user) return res.status(400).json({ message: "email already exists" });
+        if (user) return res.status(400).json({ message: "Email already exists" });
 
+        console.log(req.body)
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
         const newUser = new User({
-            fullName: fullName,
+            Username: Username,
             email: email,
             password: hashedPassword
         })
@@ -33,7 +35,7 @@ export const signup = async (req, res) => {
 
             res.status(201).json({
                 _id: newUser._id,
-                fullName: newUser.fullName,
+                Username: newUser.Username,
                 email: newUser.email,
                 profilePic: newUser.profilePic,
             });
@@ -42,6 +44,9 @@ export const signup = async (req, res) => {
         }
 
     } catch (error) {
+        if (error.name == "MongoServerError") {
+            res.status(500).json({ message: "Username already taken" })
+        }
         console.log("Error in signup controller", error.message)
         res.status(500).json({ message: "Internal Server Error" })
     }
@@ -63,7 +68,7 @@ export const login = async (req, res) => {
         generateToken(user._id, res)
         res.status(200).json({
             _id: user._id,
-            fullName: user.fullName,
+            Username: user.Username,
             email: user.email,
             profilePic: user.profilePic,
         });
@@ -112,3 +117,27 @@ export const checkAuth = (req, res) => {
         res.status(500).json({ message: "Internal Server Error" })
     }
 }
+
+export const getContacts = async (req, res) => {
+    try {
+        const contactIds = req.user.contacts
+        const contactUsers = await User.find({ "_id": { "$in": contactIds } }).select("-password")
+        res.status(200).json(contactUsers)
+    } catch (error) {
+        console.error("Error in getContacts", error.message)
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const setContact = async (req, res) => {
+    try {
+        const loggedInUserId = req.user._id
+        const { id: contactId } = req.params;
+        const updatedUser = await User.findByIdAndUpdate(loggedInUserId, { $addToSet: { 'contacts': contactId } });
+        res.status(200).json();
+    } catch (error) {
+        console.log("error in setting Contact: ", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+

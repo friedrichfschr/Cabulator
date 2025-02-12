@@ -7,8 +7,10 @@ export const useChatStore = create((set, get) => (
     {
         messages: [],
         users: [],
-        selectedUser: null,
         isUsersLoading: false,
+        contacts: [],
+        selectedContact: null,
+        isContactsLoading: false,
         isMessagesLoading: false,
 
         getUsers: async () => {
@@ -20,6 +22,31 @@ export const useChatStore = create((set, get) => (
                 toast.error("Internal Server Error")
             } finally {
                 set({ isUsersLoading: false })
+            }
+        },
+
+        setContact: async (userId) => {
+            try {
+                const res = await axiosInstance.post(`/auth/setContact/${userId}`)
+                get().getContacts()
+                get().getUsers()
+            } catch (error) {
+                toast.error("Internal Server Error")
+                console.log(error)
+            }
+        },
+
+        getContacts: async () => {
+            set({ isContactsLoading: true });
+            try {
+                const res = await axiosInstance.get("/auth/contacts")
+                set({ contacts: res.data })
+            } catch (error) {
+                toast.error("Internal Server Error")
+                console.log(error)
+
+            } finally {
+                set({ isContactsLoading: false })
             }
         },
 
@@ -35,9 +62,9 @@ export const useChatStore = create((set, get) => (
             }
         },
         sendMessage: async (messageData) => {
-            const { selectedUser, messages } = get()
+            const { selectedContact, messages } = get()
             try {
-                const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData)
+                const res = await axiosInstance.post(`/messages/send/${selectedContact._id}`, messageData)
                 set({ messages: [...messages, res.data] })
             } catch (error) {
                 toast.error(error.response.data.message);
@@ -45,8 +72,8 @@ export const useChatStore = create((set, get) => (
         },
 
         subscribeToMessages: () => {
-            const { selectedUser } = get();
-            if (!selectedUser) return;
+            const { selectedContact } = get();
+            if (!selectedContact) return;
 
             const socket = useAuthStore.getState().socket;
 
@@ -55,7 +82,7 @@ export const useChatStore = create((set, get) => (
 
                 // check if the user is selected at the moment they send a message
                 // otherwise the message would appear in the wrong chat temporarily until page is refreshed
-                if (newMessage.senderId !== selectedUser._id) return;
+                if (newMessage.senderId !== selectedContact._id) return;
 
                 set({
                     messages: [...get().messages, newMessage],
@@ -68,7 +95,7 @@ export const useChatStore = create((set, get) => (
             socket.off("newMessage")
         },
 
-        setSelectedUser: (selectedUser) => set({ selectedUser }),
+        setSelectedContact: (selectedContact) => set({ selectedContact }),
 
 
 
