@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import SidebarSkeleton from "../skeletons/SidebarSkeleton"
-import AddContact from './addContact'
+import addContact from './addContact'
 import { Users } from 'lucide-react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useChatStore } from '../../store/useChatStore'
