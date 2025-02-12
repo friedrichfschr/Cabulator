@@ -3,7 +3,7 @@ import { Loader, Search, UserPlus } from 'lucide-react';
 import { useChatStore } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
-const addContact = () => {
+const AddContact = () => {
     const [text, setText] = useState("");
 
 
@@ -111,4 +111,4 @@ const addContact = () => {
     )
 }
 
-export default addContact
+export default AddContact
