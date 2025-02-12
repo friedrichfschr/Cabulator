@@ -73,7 +73,7 @@ const ChatContainer = () => {
                                     <img
                                         src={message.image}
                                         alt="Attachment"
-                                        className="min-w-60 max-w-100 rounded-md mb-1 mt-1 object-contain"
+                                        className="min-w-40 max-w-100 rounded-md mb-1 mt-1 object-contain"
                                     />
                                 )}
 
