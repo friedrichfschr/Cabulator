@@ -12,6 +12,25 @@ export const useChatStore = create((set, get) => (
         selectedContact: null,
         isContactsLoading: false,
         isMessagesLoading: false,
+        filteredUsers: [],
+        searchString: [],
+
+        setSearchString: (text) => {
+            set({ searchString: text })
+        },
+
+        searchAndSetUsers: async () => {
+            set({ isUsersLoading: true });
+            const searchString = get().searchString;
+
+            try {
+                const res = await axiosInstance.post(`/messages/searchUsers/${searchString}`)
+                set({ filteredUsers: res.data })
+            } catch (error) {
+            } finally {
+                set({ isUsersLoading: false })
+            }
+        },
 
         getUsers: async () => {
             set({ isUsersLoading: true });
@@ -30,6 +49,8 @@ export const useChatStore = create((set, get) => (
                 const res = await axiosInstance.post(`/auth/setContact/${userId}`)
                 get().getContacts()
                 get().getUsers()
+                get().searchAndSetUsers()
+
             } catch (error) {
                 toast.error("Internal Server Error")
                 console.log(error)

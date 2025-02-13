@@ -4,26 +4,31 @@ import { useChatStore } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const AddContact = () => {
+
+
+    const [showSearch, setShowSearch] = useState(false)
     const [text, setText] = useState("");
 
-
     const { onlineContacts } = useAuthStore()
-    const { users, getUsers, setContact, isUsersLoading } = useChatStore()
+    const { users, getUsers, setContact, isUsersLoading, searchAndSetUsers, filteredUsers, setSearchString } = useChatStore()
+
     useEffect(() => {
         getUsers()
     }, [getUsers])
 
-    const filteredUsers = []
-    const shownUsers = text ? filteredUsers : users
+    useEffect(() => {
+        searchAndSetUsers()
+    }, [searchAndSetUsers])
 
-    const handleFormSubmit = (e) => {
+    const shownUsers = showSearch ? filteredUsers : users
+
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        handleSearch();
+        setSearchString(text)
+        setShowSearch(true)
+        searchAndSetUsers(text)
     };
 
-    const handleSearch = (e) => {
-
-    }
 
     return (
         <div className='p-5'>
@@ -39,18 +44,30 @@ const AddContact = () => {
 
                     <form className='flex items-center gap-2 mt-4 m-2' onSubmit={handleFormSubmit}>
                         <input type="text"
-
+                            id="addContactSearch"
                             className='input input-bordered rounded-lg input-sm grow'
                             placeholder='search users...'
                             value={text}
-                            onChange={(e) => setText(e.target.value)}
+                            onChange={(e) => {
+                                setText(e.target.value)
+                                if (showSearch) {
+                                    setShowSearch(false)
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Backspace' && showSearch) {
+                                    setText("");
+                                    setShowSearch(false)
+                                }
+                            }
+                            }
                         />
 
-                        <button type='button'
+                        <button type='submit'
 
                             className="btn btn-sm btn-circle m-2"
                             disabled={!text.trim()}
-                            onClick={handleSearch}
+                            onClick={handleFormSubmit}
                         >
                             <Search />
                         </button>
@@ -84,7 +101,9 @@ const AddContact = () => {
                                         </div>
                                     </div>
 
-                                    <button className='btn  ml-auto mr-3' onClick={() => { setContact(user._id) }}>
+                                    <button className='btn  ml-auto mr-3' onClick={() => {
+                                        setContact(user._id)
+                                    }}>
                                         <UserPlus size={20} />
                                     </button>
                                 </div>

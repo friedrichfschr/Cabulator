@@ -4,6 +4,21 @@ import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
 
 
+export const searchUsers = async (req, res) => {
+    try {
+        const { searchString } = req.params
+        const loggedInUser = req.user;
+        const filteredUsers = await User.find({
+            Username: { $regex: searchString, $options: "i" },
+            _id: { $ne: loggedInUser._id, $nin: loggedInUser.contacts }
+        }).select("-password");
+
+        res.status(200).json(filteredUsers);
+    } catch (error) {
+        console.error("Error in searchUsers", error.message)
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const getUserForSidebar = async (req, res) => {
     try {
@@ -11,7 +26,7 @@ export const getUserForSidebar = async (req, res) => {
         const loggedInUser = await User.findById(loggedInUserId).select("contacts");
 
         const filteredUsers = await User.find({
-            _id: { $ne: loggedInUserId, $nin: loggedInUser.contacts }
+            _id: { $ne: loggedInUserId, $nin: req.user.contacts }
         }).select("-password");
 
         res.status(200).json(filteredUsers)
