@@ -1,4 +1,3 @@
-import { log } from "console";
 import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js"
@@ -120,21 +119,39 @@ export const checkAuth = (req, res) => {
 
 export const getContacts = async (req, res) => {
     try {
-        const contactIds = req.user.contacts
-        const contactUsers = await User.find({ "_id": { "$in": contactIds } }).select("-password")
-        res.status(200).json(contactUsers)
+
+        // check if there are any contacts to get
+        if (!req.user.contacts) return res.status(200).json(null)
+
+        const contactIds = Array.from(req.user.contacts.keys());
+
+        const contactUsers = await User.find({ "_id": { "$in": contactIds } }).select("-password");
+
+        const contactsWithNewMessages = contactUsers.map(user => ({
+            _id: user._id,
+            Username: user.Username,
+            email: user.email,
+            profilePic: user.profilePic,
+            newMessages: req.user.contacts.get(user._id.toString())
+        }));
+
+
+
+        res.status(200).json(contactsWithNewMessages);
     } catch (error) {
-        console.error("Error in getContacts", error.message)
+        console.error("Error in getContacts", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const setContact = async (req, res) => {
     try {
         const loggedInUserId = req.user._id
         const { id: contactId } = req.params;
-        const updatedUser = await User.findByIdAndUpdate(loggedInUserId, { $addToSet: { 'contacts': contactId } });
-        res.status(200).json();
+
+        const updatedUser = await User.findByIdAndUpdate(loggedInUserId, { $set: { [`contacts.${contactId}`]: 0 } }, { new: true })
+
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.log("error in setting Contact: ", error);
         res.status(500).json({ message: "Internal Server Error" });

@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { useChatStore } from '../../store/useChatStore'
 
 const Sidebar = () => {
-    const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading } = useChatStore()
+    const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages } = useChatStore()
 
     const { onlineContacts } = useAuthStore()
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -14,6 +14,11 @@ const Sidebar = () => {
     useEffect(() => {
         getContacts()
     }, [getContacts])
+
+    useEffect(() => {
+        subscribeToMessages()
+        return () => { unsubscribeFromMessages() }
+    })
 
     const shownContacts = showOnlineOnly
         ? contacts.filter((contact) => onlineContacts.includes(contact._id))
@@ -79,6 +84,8 @@ const Sidebar = () => {
                                     {onlineContacts.includes(contact._id) ? "Online" : "Offline"}
                                 </div>
                             </div>
+                            {contact.newMessages > 0 && <div className="ml-auto badge badge-primary size-5">{contact.newMessages}</div>}
+
                         </button>
                     ))}
 

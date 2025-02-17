@@ -1,4 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
+const contactSchema = new mongoose.Schema({
+    contactId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    value: {
+        type: Number,
+        required: false,
+        default: 0,
+    }
+}, { _id: false });
+
 const userSChema = new mongoose.Schema(
     {
         email: {
@@ -16,12 +29,22 @@ const userSChema = new mongoose.Schema(
             required: true,
             minlength: 6,
         },
+        contacts: {
+            type: Map,
+        },
         profilePic: {
             type: String,
             default: "",
         },
-        contacts: {
-            type: [mongoose.Schema.Types.ObjectId]
+        bio: {
+            type: String,
+            default: ""
+        },
+        learns: {
+            type: [String],
+        },
+        speaks: {
+            type: [String],
         }
     },
     { timestamps: true }

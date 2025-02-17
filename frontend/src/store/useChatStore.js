@@ -13,7 +13,19 @@ export const useChatStore = create((set, get) => (
         isContactsLoading: false,
         isMessagesLoading: false,
         filteredUsers: [],
-        searchString: [],
+        searchString: "",
+        didReceiverReadMessage: false,
+
+
+        // getReadState: async (selectedContact) => {
+        //     try {
+        //         const res = await axiosInstance.get(`/messages/read/${selectedContact._id}`)
+
+        //         return (res.data == 0)
+        //     } catch (error) {
+        //         toast.error("Internal Server Error")
+        //     }
+        // },
 
         setSearchString: (text) => {
             set({ searchString: text })
@@ -24,9 +36,12 @@ export const useChatStore = create((set, get) => (
             const searchString = get().searchString;
 
             try {
-                const res = await axiosInstance.post(`/messages/searchUsers/${searchString}`)
-                set({ filteredUsers: res.data })
+                if (searchString) {
+                    const res = await axiosInstance.post(`/messages/searchUsers/${searchString}`)
+                    set({ filteredUsers: res.data })
+                };
             } catch (error) {
+
             } finally {
                 set({ isUsersLoading: false })
             }
@@ -36,7 +51,7 @@ export const useChatStore = create((set, get) => (
             set({ isUsersLoading: true });
             try {
                 const res = await axiosInstance.get("/messages/users")
-                set({ users: res.data })
+                if (res.data) set({ users: res.data })
             } catch (error) {
                 toast.error("Internal Server Error")
             } finally {
@@ -58,10 +73,14 @@ export const useChatStore = create((set, get) => (
         },
 
         getContacts: async () => {
+            const { selectedContact } = get()
             set({ isContactsLoading: true });
+
+            if (selectedContact) console.log(selectedContact)
+
             try {
                 const res = await axiosInstance.get("/auth/contacts")
-                set({ contacts: res.data })
+                if (res.data) set({ contacts: res.data })
             } catch (error) {
                 toast.error("Internal Server Error")
                 console.log(error)
@@ -93,21 +112,31 @@ export const useChatStore = create((set, get) => (
         },
 
         subscribeToMessages: () => {
-            const { selectedContact } = get();
-            if (!selectedContact) return;
-
             const socket = useAuthStore.getState().socket;
 
 
+            // this both updates the chatcontent if a new message is sent in real time and also increments the unread Messages count
             socket.on("newMessage", (newMessage) => {
+                const { selectedContact, contacts, messages } = get();
 
-                // check if the user is selected at the moment they send a message
-                // otherwise the message would appear in the wrong chat temporarily until page is refreshed
-                if (newMessage.senderId !== selectedContact._id) return;
 
-                set({
-                    messages: [...get().messages, newMessage],
-                })
+                // Only update the messages if the sender is the currently selected contact
+                if (selectedContact && newMessage.senderId === selectedContact._id) {
+                    set({
+                        messages: [...messages, newMessage],
+                    });
+                }
+
+                else {
+                    // Increment the newMessages counter for the sender
+                    const updatedContacts = contacts.map((contact) => {
+                        if (contact._id === newMessage.senderId) {
+                            return { ...contact, newMessages: (contact.newMessages || 0) + 1 };
+                        }
+                        return contact;
+                    });
+                    set({ contacts: updatedContacts });
+                }
             })
         },
 
@@ -116,9 +145,9 @@ export const useChatStore = create((set, get) => (
             socket.off("newMessage")
         },
 
+
+        // the selectedContact is the User Object as in Mongo of the chatUer currently selected
         setSelectedContact: (selectedContact) => set({ selectedContact }),
-
-
 
 
     }
