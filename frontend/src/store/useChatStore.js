@@ -14,18 +14,18 @@ export const useChatStore = create((set, get) => (
         isMessagesLoading: false,
         filteredUsers: [],
         searchString: "",
-        didReceiverReadMessage: false,
+        isRead: false,
 
 
-        // getReadState: async (selectedContact) => {
-        //     try {
-        //         const res = await axiosInstance.get(`/messages/read/${selectedContact._id}`)
+        getReadState: async (selectedContact) => {
+            try {
+                const res = await axiosInstance.get(`/messages/getUnreadCount/${selectedContact}`)
+                set({ isRead: (res.data == 0) })
 
-        //         return (res.data == 0)
-        //     } catch (error) {
-        //         toast.error("Internal Server Error")
-        //     }
-        // },
+            } catch (error) {
+                toast.error("Internal Server Error")
+            }
+        },
 
         setSearchString: (text) => {
             set({ searchString: text })
@@ -81,6 +81,7 @@ export const useChatStore = create((set, get) => (
             try {
                 const res = await axiosInstance.get("/auth/contacts")
                 if (res.data) set({ contacts: res.data })
+                else set({ contacts: [] })
             } catch (error) {
                 toast.error("Internal Server Error")
                 console.log(error)
@@ -90,13 +91,19 @@ export const useChatStore = create((set, get) => (
             }
         },
 
-        getMessages: async (userId) => {
+        getMessages: async (selectedContactId) => {
+            const { getReadState } = get();
             set({ isMessagesLoading: true });
             try {
-                const res = await axiosInstance.get(`/messages/${userId}`)
+                const res = await axiosInstance.get(`/messages/${selectedContactId}`)
                 set({ messages: res.data });
+
+                getReadState(selectedContactId)
+                axiosInstance.get(`/messages/markAsRead/${selectedContactId}`)
+
             } catch (error) {
                 toast.error("Internal Server Error")
+                console.log(error)
             } finally {
                 set({ isMessagesLoading: false })
             }
@@ -106,8 +113,10 @@ export const useChatStore = create((set, get) => (
             try {
                 const res = await axiosInstance.post(`/messages/send/${selectedContact._id}`, messageData)
                 set({ messages: [...messages, res.data] })
+                set({ isRead: false })
+
             } catch (error) {
-                toast.error(error.response.data.message);
+                toast.error(error);
             }
         },
 
@@ -119,12 +128,13 @@ export const useChatStore = create((set, get) => (
             socket.on("newMessage", (newMessage) => {
                 const { selectedContact, contacts, messages } = get();
 
-
                 // Only update the messages if the sender is the currently selected contact
                 if (selectedContact && newMessage.senderId === selectedContact._id) {
                     set({
                         messages: [...messages, newMessage],
                     });
+                    axiosInstance.get(`/messages/markAsRead/${selectedContact._id}`)
+                    console.log("newMessage event received")
                 }
 
                 else {
@@ -132,6 +142,7 @@ export const useChatStore = create((set, get) => (
                     const updatedContacts = contacts.map((contact) => {
                         if (contact._id === newMessage.senderId) {
                             return { ...contact, newMessages: (contact.newMessages || 0) + 1 };
+
                         }
                         return contact;
                     });
@@ -145,9 +156,26 @@ export const useChatStore = create((set, get) => (
             socket.off("newMessage")
         },
 
+        subscribeToRead: () => {
+            const socket = useAuthStore.getState().socket;
+            const { selectedContact, isRead } = get()
+            socket.on("messageRead", () => {
+                if (selectedContact) set({ isRead: true })
+                console.log("messageRead event received")
+            })
+        },
+
+        unsubscribeFromRead: () => {
+            const socket = useAuthStore.getState().socket
+            socket.off("messageRead")
+        },
+
 
         // the selectedContact is the User Object as in Mongo of the chatUer currently selected
-        setSelectedContact: (selectedContact) => set({ selectedContact }),
+        setSelectedContact: (selectedContact) => {
+            set({ selectedContact })
+            axiosInstance.get(`/messages/markAsRead/${selectedContact._id}`)
+        }
 
 
     }

@@ -112,6 +112,7 @@ export const sendMessage = async (req, res) => {
         const receiverSocketId = getReceiverSocketId(receiverId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", newMessage)
+            console.log("newMessage event emitted")
         }
 
         res.status(201).json(newMessage)
@@ -124,7 +125,7 @@ export const sendMessage = async (req, res) => {
     }
 };
 
-export const getReadState = async (req, res) => {
+export const getUnReadMessagesCount = async (req, res) => {
     try {
         const { selectedContactId } = req.params;
         const userId = req.user._id
@@ -132,7 +133,6 @@ export const getReadState = async (req, res) => {
         const user = await User.findById(selectedContactId, { [`contacts.${userId}`]: 1 });
 
         const unreadMessagesCount = user.contacts.get(userId.toString()) || 0;
-
         res.status(200).json(unreadMessagesCount)
 
     } catch (error) {
@@ -140,5 +140,22 @@ export const getReadState = async (req, res) => {
         res.status(500)
     }
 
+}
+
+export const markAsRead = async (req, res) => {
+    try {
+        // the user who sent the message will be notified that the message has been read by the user who opened the message
+        const { userWhoSentMessage } = req.params;
+        const receiverSocketId = getReceiverSocketId(userWhoSentMessage);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("messageRead",)
+            console.log("messageRead event emitted")
+        }
+
+    } catch (error) {
+        console.log("Error in markAsRead", error)
+        res.status(500).json({ message: "Internal Server Error" });
+
+    }
 }
 

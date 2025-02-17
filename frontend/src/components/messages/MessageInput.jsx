@@ -37,18 +37,19 @@ const MessageInput = () => {
             // prevents sending the same message multiple times if enter or send button is pressed multiple times
             const storeText = text
             const storeImagePreview = imagePreview
+
             setText("")
             setImagePreview(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
-            await sendMessage({
+
+            const messageData = {
                 text: storeText.trim(),
                 image: storeImagePreview,
-            });
+            }
+            await sendMessage(messageData);
 
-            // clear Form
 
-
-        } catch {
+        } catch (error) {
             console.error("Failed to send message: ", error)
             toast.error("Failed to send message")
         }

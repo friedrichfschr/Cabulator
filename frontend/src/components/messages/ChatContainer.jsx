@@ -8,32 +8,34 @@ import { formatMessageTime } from "../../lib/utils";
 
 
 const ChatContainer = () => {
-    const { messages, getMessages, isMessagesLoading, selectedContact, subscribeToMessages, unsubscribeFromMessages, getReadState } = useChatStore()
+    const { selectedContact,
+        messages, getMessages, isMessagesLoading,
+        subscribeToMessages, unsubscribeFromMessages,
+        getReadState, subscribeToRead, unsubscribeFromRead, isRead,
+    } = useChatStore()
+
     const { authUser } = useAuthStore();
 
     const messageEndRef = useRef(null);
 
-    const [isRead, setisRead] = useState(false)
 
-    // useEffect(() => {
-    //     const getReadStateAsync = async () => {
-    //         setisRead(await getReadState(selectedContact))
-    //     }
-    //     getReadStateAsync()
 
-    // }, [selectedContact, getReadState])
+    useEffect(() => {
+        getReadState(selectedContact._id);
+        subscribeToRead();
+        return () => unsubscribeFromRead();
+
+    }, [selectedContact, getReadState, getMessages])
 
     useEffect(() => {
         getMessages(selectedContact._id);
         subscribeToMessages();
-
         return () => unsubscribeFromMessages();
     }, [selectedContact._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
-
     useEffect(() => {
         if (messageEndRef.current && messages) {
-            messageEndRef.current.scrollIntoView({ behavior: "smooth" })
+            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
@@ -95,8 +97,13 @@ const ChatContainer = () => {
 
                                     {message.text && <p style={{ "wordBreak": "break-all" }}>{message.text}</p>}
                                 </div>
-
-
+                                <div className='chat-footer'>
+                                    {isLastMessage && message.senderId === authUser._id && (
+                                        <span className="text-xs text-gray-500 mt-1 ml-2 mb-0">
+                                            {isRead ? "Read" : "Delivered"}
+                                        </span>
+                                    )}
+                                </div>
 
                             </div>
                         );
