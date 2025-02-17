@@ -9,7 +9,7 @@ const AddContact = () => {
     const [showSearch, setShowSearch] = useState(false)
     const [text, setText] = useState("");
 
-    const { onlineContacts } = useAuthStore()
+    const { onlineUsers } = useAuthStore()
     const { users, getUsers, setContact, isUsersLoading, searchAndSetUsers, filteredUsers, setSearchString } = useChatStore()
 
     useEffect(() => {
@@ -86,7 +86,7 @@ const AddContact = () => {
                                             alt={user.name}
                                             className="size-12 object-cover rounded-full"
                                         />
-                                        {onlineContacts.includes(user._id) && (
+                                        {onlineUsers.includes(user._id) && (
                                             <span
                                                 className="absolute bottom-0 right-0 size-3 bg-green-500 
                   rounded-full ring-2 ring-zinc-900"
@@ -97,7 +97,7 @@ const AddContact = () => {
                                     <div className="block text-left min-w-0">
                                         <div className="font-medium truncate">{user.Username}</div>
                                         <div className="text-sm text-zinc-400">
-                                            {onlineContacts.includes(user._id) ? "Online" : "Offline"}
+                                            {onlineUsers.includes(user._id) ? "Online" : "Offline"}
                                         </div>
                                     </div>
 

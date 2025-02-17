@@ -4,7 +4,7 @@ import { useChatStore } from "../../store/useChatStore";
 
 const ChatHeader = () => {
     const { selectedContact, setSelectedContact, getMessages } = useChatStore();
-    const { onlineContacts } = useAuthStore();
+    const { onlineUsers } = useAuthStore();
 
     return (
         <div className="p-2.5 border-b border-base-300">
@@ -21,7 +21,7 @@ const ChatHeader = () => {
                     <div>
                         <h3 className="font-medium">{selectedContact.Username}</h3>
                         <p className="text-sm text-base-content/70">
-                            {onlineContacts.includes(selectedContact._id) ? "Online" : "Offline"}
+                            {onlineUsers.includes(selectedContact._id) ? "Online" : "Offline"}
                         </p>
                     </div>
                 </div>

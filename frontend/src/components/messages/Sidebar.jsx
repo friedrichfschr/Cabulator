@@ -8,7 +8,7 @@ import { useChatStore } from '../../store/useChatStore'
 const Sidebar = () => {
     const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages } = useChatStore()
 
-    const { onlineContacts } = useAuthStore()
+    const { onlineUsers } = useAuthStore()
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     useEffect(() => {
@@ -20,9 +20,8 @@ const Sidebar = () => {
         return () => { unsubscribeFromMessages() }
     })
 
-    const shownContacts = showOnlineOnly
-        ? contacts.filter((contact) => onlineContacts.includes(contact._id))
-        : contacts;
+    const onlineContacts = contacts.filter((contact) => onlineUsers.includes(contact._id))
+    const shownContacts = showOnlineOnly ? onlineContacts : contacts;
 
 
 
@@ -46,7 +45,7 @@ const Sidebar = () => {
                     />
                     <span className="text-sm">Show online only</span>
                 </label>
-                <span className="text-xs text-zinc-500">({onlineContacts.length - 1} online)</span>
+                <span className="text-xs text-zinc-500">({onlineContacts.length} online)</span>
             </div>
 
 
@@ -69,7 +68,7 @@ const Sidebar = () => {
                                     alt={contact.name}
                                     className="size-12 object-cover rounded-full"
                                 />
-                                {onlineContacts.includes(contact._id) && (
+                                {onlineUsers.includes(contact._id) && (
                                     <span
                                         className="absolute bottom-0 right-0 size-3 bg-green-500 
                   rounded-full ring-2 ring-zinc-900"
@@ -81,7 +80,7 @@ const Sidebar = () => {
                             <div className="block text-left min-w-0">
                                 <div className="font-medium truncate">{contact.Username}</div>
                                 <div className="text-sm text-zinc-400">
-                                    {onlineContacts.includes(contact._id) ? "Online" : "Offline"}
+                                    {onlineUsers.includes(contact._id) ? "Online" : "Offline"}
                                 </div>
                             </div>
                             {contact.newMessages > 0 && <div className="ml-auto badge badge-primary size-5">{contact.newMessages}</div>}

@@ -20,7 +20,7 @@ export function getReceiverSocketId(userId) {
 const userSocketMap = {}; // {userId: socketId}
 
 io.on("connection", (socket) => {
-    console.log("A user connected", socket.id);
+    // console.log("A user connected", socket.id);
 
     const userId = socket.handshake.query.userId
     if (userId) {
@@ -30,12 +30,23 @@ io.on("connection", (socket) => {
     // io.emit is used to send events to all connected users
     io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
+    socket.on("markAsRead", (selectedContactId, readBy) => {
+        // Notify the sender that the message has been read
+        const receiverSocketId = getReceiverSocketId(selectedContactId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("messageRead", readBy);
+        }
+    })
+
     socket.on("disconnect", () => {
-        console.log("A user disconnected", socket.id)
+        // console.log("A user disconnected", socket.id)
         delete userSocketMap[userId]
         io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
     })
+
+
 })
+
 
 export { io, app, server };
