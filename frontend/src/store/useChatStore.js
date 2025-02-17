@@ -106,12 +106,21 @@ export const useChatStore = create((set, get) => (
         sendMessage: async (messageData) => {
 
             // set's the message footer to "delivered"
-            set({ isRead: false })
 
             const { selectedContact, messages } = get()
             try {
+
+                messageData.receiverId = selectedContact._id
+                messageData.senderId = useAuthStore.getState().authUser._id
+                const now = new Date().toISOString()
+                messageData.createdAt = now
+                messageData.updatedAt = now
+                messageData._id = Math.random().toString(36).substr(2, 9)
+
+                set({ messages: [...messages, messageData] })
+                set({ isRead: false })
+
                 const res = await axiosInstance.post(`/messages/send/${selectedContact._id}`, messageData)
-                set({ messages: [...messages, res.data] })
 
             } catch (error) {
                 toast.error(error);

@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import User from "../models/user.model.js";
 
 const app = express();
 const server = http.createServer(app)
@@ -36,6 +37,11 @@ io.on("connection", (socket) => {
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("messageRead", readBy);
         }
+
+        // update the database that the message has been read
+        // this is need so that the message will still be shown as read even if the page was reloaded and the read state queried from the DB
+        User.findByIdAndUpdate(readBy, { $set: { [`contacts.${selectedContactId}`]: 0 } }).exec();
+
     })
 
     socket.on("disconnect", () => {
