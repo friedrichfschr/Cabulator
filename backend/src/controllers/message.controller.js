@@ -6,10 +6,13 @@ import User from "../models/user.model.js";
 
 export const searchUsers = async (req, res) => {
     try {
-        const { searchString } = req.params
+        const { searchString } = req.params;
         const loggedInUser = req.user;
 
-        const contactIds = Array.from(req.user.contacts.keys());
+        let contactIds = [];
+        if (req.user.contacts) {
+            contactIds = Array.from(req.user.contacts.keys());
+        }
 
         const filteredUsers = await User.find({
             Username: { $regex: searchString, $options: "i" },
@@ -18,7 +21,7 @@ export const searchUsers = async (req, res) => {
 
         res.status(200).json(filteredUsers);
     } catch (error) {
-        console.error("Error in searchUsers", error.message)
+        console.error("Error in searchUsers", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

@@ -48,7 +48,7 @@ const Navbar = () => {
                                     <Settings className="w-4 h-4" />
 
                                 </Link>
-                                <Link to={"/profile"} className={`btn btn-sm gap-2`}>
+                                <Link to={"/own-profile"} className={`btn btn-sm gap-2`}>
                                     <User className="size-5" />
 
                                 </Link>

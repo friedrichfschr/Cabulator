@@ -10,7 +10,7 @@ import LoginPage from './pages/auth/LoginPage'
 
 import HomePage from './pages/HomePage'
 import SettingsPage from './pages/SettingsPage'
-import ProfilePage from './pages/ProfilePage'
+import EditProfilePage from './pages/EditProfilePage'
 
 import MessagesPage from "./pages/tools/MessagesPage"
 import FlashcardsPage from "./pages/tools/FlashcardsPage"
@@ -18,6 +18,7 @@ import ReaderPage from './pages/tools/ReaderPage'
 
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
+import ProfilePage from './pages/ProfilePage'
 
 
 
@@ -48,15 +49,13 @@ const App = () => {
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
 
         <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/own-profile" element={authUser ? <EditProfilePage /> : <Navigate to="/login" />} />
         <Route path="/messages" element={authUser ? <MessagesPage /> : <Navigate to="/login" />} />
         <Route path="/flashcards" element={authUser ? <FlashcardsPage /> : <Navigate to="/login" />} />
         <Route path="/reader" element={authUser ? <ReaderPage /> : <Navigate to="/login" />} />
-
+        <Route path="/profile/:username" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
       </Routes>
-      <Toaster
-
-      />
+      <Toaster />
     </div >
   )
 }

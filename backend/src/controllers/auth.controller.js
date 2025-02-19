@@ -91,15 +91,33 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { profilePic } = req.body;
-        const userID = req.user._id
+        const { profilePic, Username, bio, speaks, learns } = req.body;
+        const userId = req.user._id
 
-        if (!profilePic) {
-            return res.status(400).json({ message: "Profile pic is required" })
+        const updatedprofile = {};
+
+        if (Username) {
+            const doesUsernameExist = await User.findOne({ Username });
+            if (doesUsernameExist && doesUsernameExist._id.toString() !== userId.toString()) {
+                return res.status(400).json({ message: "Username already exists" });
+            }
+            updatedprofile.Username = Username;
         }
 
-        const uploadResponse = await cloudinary.uploader.upload(profilePic);
-        const updatedUser = await User.findByIdAndUpdate(userID, { profilePic: uploadResponse.secure_url }, { new: true });
+        if (profilePic) {
+            const uploadResponse = await cloudinary.uploader.upload(profilePic);
+            updatedprofile.profilePic = uploadResponse.secure_url;
+        }
+
+        if (bio) {
+            updatedprofile.bio = bio;
+        }
+
+        if (speaks) { updatedprofile.speaks = speaks; }
+
+        if (learns) { updatedprofile.learns = learns; }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedprofile, { new: true });
 
         res.status(200).json(updatedUser)
     } catch (error) {
@@ -158,3 +176,37 @@ export const setContact = async (req, res) => {
     }
 };
 
+export const getUserByUsername = async (req, res) => {
+    try {
+        const { username } = req.params;
+        const user = await User.findOne({ Username: username }).select("-password");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+
+    } catch (error) {
+        console.log("Error in getUserByUsername controller", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+};
+
+export const updateSettings = async (req, res) => {
+    try {
+        const { sendReadReceipts, sendTypingIndicators } = req.body;
+        const userId = req.user._id;
+        const updatedSettings = {};
+
+        if (sendReadReceipts) {
+            updatedSettings.sendReadReceipts = sendReadReceipts;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedSettings, { new: true });
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+
+    }
+
+
+}

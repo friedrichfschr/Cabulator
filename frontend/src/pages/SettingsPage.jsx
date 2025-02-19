@@ -15,7 +15,7 @@ const SettingsPage = () => {
         <div className='height:100% container mx-auto px-4 pt-20 max-w-5xl'>
             {/* name of each tab group should be unique */}
             <div role="tablist" className="tabs tabs-box">
-                <input type="radio" name="my_tabs_5" role="tab" className="tab" aria-label="Appearance" defaultChecked />
+                <input type="radio" name="setting" role="tab" className="tab" aria-label="Appearance" defaultChecked />
                 <div className="tab-content bg-base-100 border-base-300 p-6">
 
                     <div className='height:100% container mx-auto px-4 pt-4 max-w-5xl'>
@@ -30,7 +30,7 @@ const SettingsPage = () => {
                                     key={t}
                                     className={`
                 group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
-                ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}
+                ${theme === t ? "bg-base-300" : "hover:bg-base-200/50"}
               `}
                                     onClick={() => setTheme(t)}
                                 >
@@ -123,14 +123,17 @@ const SettingsPage = () => {
 
                 </div>
 
-                <input type="radio" name="my_tabs_5" role="tab" className="tab" aria-label="Messages" />
+                <input type="radio" name="setting" role="tab" className="tab" aria-label="Messages" />
                 <div className="tab-content bg-base-100 border-base-300 p-6">Tab content 2</div>
 
-                <input type="radio" name="my_tabs_5" role="tab" className="tab" aria-label="Flashcards" />
+                <input type="radio" name="setting" role="tab" className="tab" aria-label="Flashcards" />
                 <div className="tab-content bg-base-100 border-base-300 p-6">Tab content 3</div>
 
-                <input type="radio" name="my_tabs_5" role="tab" className="tab" aria-label="Reader" />
+                <input type="radio" name="setting" role="tab" className="tab" aria-label="Reader" />
                 <div className="tab-content bg-base-100 border-base-300 p-6">Tab content 4</div>
+
+                <input type="radio" name="setting" role="tab" className="tab" aria-label="News" />
+                <div className="tab-content bg-base-100 border-base-300 p-6">Tab content 5</div>
             </div>
         </div>
 

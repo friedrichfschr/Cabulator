@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { formatMessageTime } from "../../lib/utils";
 
 
+
 const ChatContainer = () => {
     const { selectedContact,
         messages, getMessages, isMessagesLoading,
@@ -15,10 +16,6 @@ const ChatContainer = () => {
     } = useChatStore()
 
     const { authUser } = useAuthStore();
-
-    const messageEndRef = useRef(null);
-
-
 
     useEffect(() => {
         getReadState(selectedContact._id);
@@ -33,12 +30,14 @@ const ChatContainer = () => {
         return () => unsubscribeFromMessages();
     }, [selectedContact._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
+    const messageEndRef = useRef(null);
+
     useEffect(() => {
         if (messageEndRef.current && messages) {
             messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [messages]);
 
+    }, [messages]);
 
 
     if (isMessagesLoading) {
@@ -54,12 +53,11 @@ const ChatContainer = () => {
     return (
         <div className='flex flex-col h-full  '>
             <div >
-                {/* className='mt-30 max-[450px]:mt-54' */}
                 <ChatHeader />
             </div>
 
             {messages.length > 0 ? (
-                <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 space-y-4'>
+                <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 mt-0 space-y-4'>
                     {messages.map((message, index) => {
                         const isLastMessage = index === messages.length - 1;
                         return (

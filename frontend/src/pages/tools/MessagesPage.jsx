@@ -5,11 +5,13 @@ import NoChatSelected from '../../components/messages/NoChatSelected';
 import ChatContainer from '../../components/messages/ChatContainer';
 
 const HomePage = () => {
-    const { selectedContact } = useChatStore();
+    const { selectedContact, } = useChatStore();
 
     return (
+
         <div className="h-100dvh bg-base-200 overflow-hidden">
             <div className="flex items-center justify-center pt-20 px-4">
+
                 <div className="overflow-hidden bg-base-100 rounded-lg shadow-cl w-full max-w-6xl mt-2 h-[calc(100dvh-6rem)] ">
                     {!selectedContact && <div className="flex h-full rounded-lg overflow-hidden">
 
@@ -20,6 +22,7 @@ const HomePage = () => {
                 </div>
             </div>
         </div>
+
     )
 }
 

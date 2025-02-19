@@ -73,11 +73,12 @@ export const useAuthStore = create((set, get) => ({
         set({ isUpdatingProfile: true });
         try {
             const res = await axiosInstance.put("/auth/update-profile", data)
+            if (res.status === 400) return toast.error(res.data.message)
             set({ authUser: res.data })
             toast.success("Profile updated successfully")
         } catch (error) {
             console.log(error)
-            toast.error("Internal Server Error: \n Image size may be too large")
+            toast.error(res.data.message)
         } finally {
             set({ isUpdatingProfile: false })
         }
@@ -100,7 +101,6 @@ export const useAuthStore = create((set, get) => ({
         socket.on("getOnlineUsers", (usersIds) => {
             set({ onlineUsers: usersIds });
         })
-
     },
     disconnectSocket: () => {
         if (get().socket?.connected) get().socket.disconnect();
