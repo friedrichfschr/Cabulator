@@ -6,13 +6,12 @@ import MessageSkeleton from '../skeletons/MessageSkeleton'
 import { useAuthStore } from '../../store/useAuthStore'
 import { formatMessageTime } from "../../lib/utils";
 
-
-
 const ChatContainer = () => {
     const { selectedContact,
         messages, getMessages, isMessagesLoading,
         subscribeToMessages, unsubscribeFromMessages,
         getReadState, subscribeToRead, unsubscribeFromRead, isRead,
+        subscribeToTyping, unsubscribeFromTyping, isTyping
     } = useChatStore()
 
     const { authUser } = useAuthStore();
@@ -21,7 +20,6 @@ const ChatContainer = () => {
         getReadState(selectedContact._id);
         subscribeToRead();
         return () => unsubscribeFromRead();
-
     }, [selectedContact, getReadState, getMessages])
 
     useEffect(() => {
@@ -30,15 +28,18 @@ const ChatContainer = () => {
         return () => unsubscribeFromMessages();
     }, [selectedContact._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
+    useEffect(() => {
+        subscribeToTyping();
+        return () => unsubscribeFromTyping();
+    }, [subscribeToTyping, unsubscribeFromTyping])
+
     const messageEndRef = useRef(null);
 
     useEffect(() => {
-        if (messageEndRef.current && messages) {
+        if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-
-    }, [messages]);
-
+    }, [messages, isTyping]);
 
     if (isMessagesLoading) {
         return (
@@ -51,8 +52,8 @@ const ChatContainer = () => {
     }
 
     return (
-        <div className='flex flex-col h-full  '>
-            <div >
+        <div className='flex flex-col h-full'>
+            <div>
                 <ChatHeader />
             </div>
 
@@ -102,10 +103,28 @@ const ChatContainer = () => {
                                         </span>
                                     )}
                                 </div>
-
                             </div>
                         );
                     })}
+                    {isTyping && (
+                        <div className='chat chat-start'>
+                            <div className="chat-image avatar">
+                                <div className="size-10 rounded-full border">
+                                    <img
+                                        src={selectedContact.profilePic || "/avatar.png"}
+                                        alt="profile pic"
+                                    />
+                                </div>
+                            </div>
+                            <div className="chat-bubble flex flex-col max-w-120 ">
+                                <div className="typing-indicator mt-1">
+                                    <span className="dot"></span>
+                                    <span className="dot"></span>
+                                    <span className="dot"></span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className='flex-1 flex overflow-y-auto space-y items-center justify-center'>
@@ -113,14 +132,10 @@ const ChatContainer = () => {
                 </div>
             )}
 
-
-            <div className='  mt-2'>
+            <div className=''>
                 <MessageInput />
             </div>
-
-
-
-        </div >
+        </div>
     )
 }
 

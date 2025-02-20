@@ -44,12 +44,22 @@ io.on("connection", (socket) => {
 
     })
 
-    socket.on("typing", (selectedContactId, senderId) => {
+    socket.on("startTyping", (selectedContactId, senderId) => {
         const receiverSocketId = getReceiverSocketId(selectedContactId);
         if (receiverSocketId) {
-            io.to(receiverSocketId).emit("typing", senderId);
+            io.to(receiverSocketId).emit("startTyping", senderId);
+            console.log("typing")
         }
     })
+    socket.on("stopTyping", (selectedContactId, senderId) => {
+        const receiverSocketId = getReceiverSocketId(selectedContactId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("stopTyping", senderId);
+            console.log("stopped typing")
+
+        }
+    })
+
 
     socket.on("disconnect", () => {
         // console.log("A user disconnected", socket.id)

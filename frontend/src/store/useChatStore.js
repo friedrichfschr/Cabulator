@@ -15,6 +15,7 @@ export const useChatStore = create((set, get) => (
         filteredUsers: [],
         searchString: "",
         isRead: false,
+        isTyping: false,
 
 
         getReadState: async (selectedContact) => {
@@ -130,7 +131,6 @@ export const useChatStore = create((set, get) => (
         subscribeToMessages: () => {
             const socket = useAuthStore.getState().socket;
 
-
             // this both updates the chatcontent if a new message is sent in real time and also increments the unread Messages count
             socket.on("newMessage", (newMessage) => {
                 const { selectedContact, contacts, messages } = get();
@@ -171,8 +171,6 @@ export const useChatStore = create((set, get) => (
             socket.on("messageRead", (readBy) => {
                 if (selectedContact._id == readBy) {
                     set({ isRead: true })
-                    console.log(readBy)
-
                 }
             })
         },
@@ -180,6 +178,26 @@ export const useChatStore = create((set, get) => (
         unsubscribeFromRead: () => {
             const socket = useAuthStore.getState().socket
             socket.off("messageRead")
+        },
+
+        subscribeToTyping: () => {
+            const socket = useAuthStore.getState().socket;
+            const { selectedContact } = get()
+            socket.on("startTyping", (senderId) => {
+                if (selectedContact._id == senderId) {
+                    set({ isTyping: true })
+                }
+            })
+            socket.on("stopTyping", (senderId) => {
+                if (selectedContact._id == senderId) {
+                    set({ isTyping: false })
+                }
+            })
+        },
+        unsubscribeFromTyping: () => {
+            const socket = useAuthStore.getState().socket
+            socket.off("stopTyping")
+            socket.off("startTyping")
         },
 
 
@@ -196,8 +214,6 @@ export const useChatStore = create((set, get) => (
                 getReadState(selectedContact._id)
 
             }
-        }
-
-
+        },
     }
 ))
