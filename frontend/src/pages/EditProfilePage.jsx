@@ -149,6 +149,7 @@ const EditProfilePage = () => {
                                 className="px-4 py-2.5  rounded-lg border w-full"
                                 maxLength={20}
                                 rows={1}
+                                style={{ resize: 'none' }}
                             />
                         ) : (
                             <p className="px-4 py-2.5 bg-base-300 rounded-lg border">{authUser?.Username}</p>
@@ -175,6 +176,7 @@ const EditProfilePage = () => {
                                 className="px-4 py-2.5 rounded-lg border w-full"
                                 maxLength={300}
                                 rows={3}
+                                style={{ resize: 'none' }}
                             />
                         ) : (
                             <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{authUser?.bio}</p>

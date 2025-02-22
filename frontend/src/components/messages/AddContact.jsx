@@ -132,7 +132,7 @@ const AddContact = () => {
                                 </div>
                             ))}
                             {shownUsers.length === 0 && (
-                                <div className='justify-self-center mt-5 text-zinc-500'>
+                                <div className='flex items-center justify-center mt-5 text-zinc-500'>
                                     No users found
                                 </div>
                             )}

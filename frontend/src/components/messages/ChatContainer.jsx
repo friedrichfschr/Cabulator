@@ -2,9 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useChatStore } from '../../store/useChatStore'
 import MessageInput from "./MessageInput"
 import ChatHeader from "./ChatHeader"
+import ViewImage from '../viewImage'
 import MessageSkeleton from '../skeletons/MessageSkeleton'
 import { useAuthStore } from '../../store/useAuthStore'
 import { formatMessageTime } from "../../lib/utils";
+
+let saveLastMessageTime = null;
 
 const ChatContainer = () => {
     const { selectedContact,
@@ -61,6 +64,9 @@ const ChatContainer = () => {
                 <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 mt-0 space-y-4'>
                     {messages.map((message, index) => {
                         const isLastMessage = index === messages.length - 1;
+                        const currentMessageTime = formatMessageTime(message.updatedAt)
+                        const lastMessageTime = saveLastMessageTime;
+                        saveLastMessageTime = currentMessageTime
                         return (
                             <div
                                 key={message._id}
@@ -80,21 +86,24 @@ const ChatContainer = () => {
                                     </div>
                                 </div>
 
-                                <div className="chat-header mb-1">
+                                <div className="chat-header mb-1 ">
                                     <time className="text-xs opacity-50 ml-1">
-                                        {formatMessageTime(message.createdAt)}
+
+                                        {!(lastMessageTime == currentMessageTime) && currentMessageTime}
                                     </time>
                                 </div>
                                 <div className="chat-bubble flex flex-col max-w-120">
                                     {message.image && (
-                                        <img
+
+                                        <ViewImage
+                                            classes="min-w-20 max-w-full max-h-90 rounded-md mb-1 mt-1 object-contain"
                                             src={message.image}
                                             alt="Attachment"
-                                            className="min-w-20 max-w-full max-h-90 rounded-md mb-1 mt-1 object-contain"
                                         />
+
                                     )}
 
-                                    {message.text && <p style={{ "wordBreak": "break-all" }}>{message.text}</p>}
+                                    {message.text && <p style={{ "wordBreak": "break-all", "whiteSpace": "pre-wrap" }}>{message.text}</p>}
                                 </div>
                                 <div className='chat-footer'>
                                     {isLastMessage && message.senderId === authUser._id && (

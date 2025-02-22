@@ -3,14 +3,15 @@ import { useChatStore } from '../../store/useChatStore';
 import { Image, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/useAuthStore';
+import Textarea from '../Textarea';
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
+    const textareaRef = useRef(null);
     const { sendMessage, selectedContact } = useChatStore();
     const { authUser, socket } = useAuthStore();
-    const [isTyping, setIsTyping] = useState(false);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -58,16 +59,11 @@ const MessageInput = () => {
 
     useEffect(() => {
         const handleStartTyping = () => {
-            if (!isTyping) {
-                socket.emit("startTyping", selectedContact._id, authUser._id);
-                setIsTyping(true);
-            }
+            socket.emit("startTyping", selectedContact._id, authUser._id);
         };
 
         const handleStopTyping = () => {
             socket.emit("stopTyping", selectedContact._id, authUser._id);
-            console.log("stopped typing")
-            setIsTyping(false);
         };
 
         const inputElement = document.getElementById("messageInput");
@@ -78,7 +74,23 @@ const MessageInput = () => {
             inputElement.removeEventListener("focus", handleStartTyping);
             inputElement.removeEventListener("blur", handleStopTyping);
         };
-    }, [isTyping, selectedContact, socket, authUser]);
+    }, [selectedContact, socket, authUser]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.ctrlKey) {
+            e.preventDefault();
+            handleSendMessage(e);
+        } else if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+
+            const cursorPosition = textareaRef.current.selectionStart;
+            const newText = text.slice(0, cursorPosition) + "\n" + text.slice(cursorPosition);
+            setText(newText);
+            setTimeout(() => {
+                textareaRef.current.selectionStart = textareaRef.current.selectionEnd = cursorPosition + 1;
+            }, 0);
+        }
+    };
 
     return (
         <div className='p-3 pt-0 w-full'>
@@ -101,14 +113,14 @@ const MessageInput = () => {
             )}
 
             <form onSubmit={handleSendMessage} className='flex items-center gap-2'>
+
                 <div className='flex-1 flex gap-2'>
-                    <input
-                        type="text"
-                        id="messageInput"
-                        className="w-full input input-bordered rounded-lg input-sm sm:input-md font-size:16px"
-                        placeholder="Type a message..."
+                    <Textarea
+                        givenId="messageInput"
+                        ref={textareaRef}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
+                        onKeyDown={handleKeyDown}
                     />
                     <input
                         type="file"
@@ -124,16 +136,16 @@ const MessageInput = () => {
                     >
                         <Image size={20} />
                     </button>
+                    <button
+                        type="submit"
+                        className="btn btn-sm btn-circle"
+                        disabled={!text.trim() && !imagePreview}
+                    >
+                        <Send size={22} />
+                    </button>
                 </div>
-                <button
-                    type="submit"
-                    className="btn btn-sm btn-circle"
-                    disabled={!text.trim() && !imagePreview}
-                >
-                    <Send size={22} />
-                </button>
             </form>
-        </div>
+        </div >
     );
 };
 

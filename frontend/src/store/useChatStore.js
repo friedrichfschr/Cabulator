@@ -136,7 +136,7 @@ export const useChatStore = create((set, get) => (
                 const { selectedContact, contacts, messages } = get();
 
                 // Only update the messages if the sender is the currently selected contact
-                if (selectedContact && newMessage.senderId === selectedContact._id) {
+                if (newMessage.senderId === selectedContact?._id) {
                     set({
                         messages: [...messages, newMessage],
                     });
@@ -182,15 +182,20 @@ export const useChatStore = create((set, get) => (
 
         subscribeToTyping: () => {
             const socket = useAuthStore.getState().socket;
-            const { selectedContact } = get()
+            const { selectedContact, contacts } = get()
             socket.on("startTyping", (senderId) => {
-                if (selectedContact._id == senderId) {
+                if (selectedContact?._id == senderId) {
                     set({ isTyping: true })
+                } else {
+                    set({ contacts: contacts.map((contact) => contact._id === senderId ? { ...contact, isTyping: true } : contact) })
                 }
+
             })
             socket.on("stopTyping", (senderId) => {
-                if (selectedContact._id == senderId) {
+                if (selectedContact?._id == senderId) {
                     set({ isTyping: false })
+                } else {
+                    set({ contacts: contacts.map((contact) => contact._id === senderId ? { ...contact, isTyping: false } : contact) })
                 }
             })
         },

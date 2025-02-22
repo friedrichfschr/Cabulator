@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore'
 import { useChatStore } from '../../store/useChatStore'
 
 const Sidebar = () => {
-    const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages } = useChatStore()
+    const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages, subscribeToTyping, unsubscribeFromTyping } = useChatStore()
 
     const { onlineUsers } = useAuthStore()
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -20,10 +20,13 @@ const Sidebar = () => {
         return () => { unsubscribeFromMessages() }
     })
 
+    useEffect(() => {
+        subscribeToTyping();
+        return () => unsubscribeFromTyping();
+    })
+
     const onlineContacts = contacts.filter((contact) => onlineUsers.includes(contact._id))
     const shownContacts = showOnlineOnly ? onlineContacts : contacts;
-
-
 
     return (
         <aside className="grow-1 h-full border-r border-base-300 flex flex-col transition-all duration-200">
@@ -83,8 +86,13 @@ const Sidebar = () => {
                                     {onlineUsers.includes(contact._id) ? "Online" : "Offline"}
                                 </div>
                             </div>
-                            {contact.newMessages > 0 && <div className="ml-auto badge badge-primary size-5">{contact.newMessages}</div>}
+                            { }
 
+                            {contact.isTyping ? <div className="ml-auto typing-indicator mt-1">
+                                <span className="dot"></span>
+                                <span className="dot"></span>
+                                <span className="dot"></span>
+                            </div> : contact.newMessages > 0 && <div className="ml-auto badge badge-primary size-5">{contact.newMessages}</div>}
                         </button>
                     ))}
 

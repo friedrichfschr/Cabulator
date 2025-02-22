@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { axiosInstance } from '../lib/axios';
+import ViewImage from '../components/viewImage';
+import { Languages, ScrollText, User } from 'lucide-react';
 
 const ProfilePage = () => {
     const { username } = useParams();
@@ -27,13 +29,49 @@ const ProfilePage = () => {
                 </div>
 
                 <div className='text-center mt-5'>
-                    <img
+                    <ViewImage
+                        classes="size-32 rounded-full object-cover border-4 mx-auto"
                         src={user?.profilePic || "/avatar.png"}
                         alt="Profile"
-                        className="size-32 rounded-full object-cover border-4 mx-auto"
                     />
                 </div>
 
+                {/* bio Section */}
+                <div className="relative space-y-1.5">
+                    <div className="text-sm text-zinc-400 flex items-center gap-2">
+                        <ScrollText className="w-4 h-4" />
+                        Biography
+                    </div>
+                    {(
+                        <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{user?.bio}</p>
+                    )}
+                </div>
+
+                {/* Fluent Languages*/}
+                <div className="relative space-y-1.5 mt-5">
+                    <div className="text-sm text-zinc-400 flex items-center gap-2">
+                        <Languages className="w-4 h-4" />
+                        Fluent Languages
+                    </div>
+
+                    <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full">
+                        {user?.speaks.join(', ') || 'No languages selected'}
+                    </p>
+
+                </div>
+
+                {/* Studied Languages*/}
+                <div className="relative space-y-1.5">
+                    <div className="text-sm text-zinc-400 flex items-center gap-2">
+                        <Languages className="w-4 h-4" />
+                        Studied Languages
+                    </div>
+
+                    <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full">
+                        {user?.learns.join(', ') || 'No languages selected'}
+                    </p>
+
+                </div>
             </div>
         </div>
     );

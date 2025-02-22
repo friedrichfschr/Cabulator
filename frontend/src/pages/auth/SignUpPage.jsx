@@ -67,12 +67,15 @@ const SignUpPage = () => {
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <User className="size-5 text-base-content/40" />
                                 </div>
-                                <input
-                                    type="text"
-                                    className={`input input-bordered w-full pl-10`}
-                                    placeholder="John Doe"
+
+                                <textarea
                                     value={formData.Username}
+                                    placeholder="John Doe"
                                     onChange={(e) => setFormData({ ...formData, Username: e.target.value })}
+                                    className={`input input-bordered w-full pl-10 pt-2`}
+                                    maxLength={20}
+                                    rows={1}
+                                    style={{ resize: 'none' }}
                                 />
                             </div>
                         </div>
