@@ -26,11 +26,11 @@ export const searchUsers = async (req, res) => {
     }
 };
 
-export const getUserForSidebar = async (req, res) => {
+export const getUsersForAddingContact = async (req, res) => {
     try {
         const loggedInUserId = req.user._id
 
-        // check if contacts need to be excluded
+        // check if there are any contacts to be excluded
         if (req.user.contacts) {
             const contactIds = Array.from(req.user.contacts.keys());
             const filteredUsers = await User.find({
@@ -46,33 +46,38 @@ export const getUserForSidebar = async (req, res) => {
         }
 
     } catch (error) {
-        console.error("Error in getUserForSidebar", error)
+        console.error("Error in getUsersForAddingContact", error)
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
-
-
-
 export const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params
-        const myId = req.user._id
+        const { id: userToChatId } = req.params;
+        const myId = req.user._id;
 
         const messages = await Message.find({
             $or: [
                 { senderId: myId, receiverId: userToChatId },
                 { senderId: userToChatId, receiverId: myId },
             ]
-        })
+        });
+
         const user = await User.findById(myId);
-        if (user.settings.sendReadReceipts) {
-            await User.findByIdAndUpdate(myId, { $set: { [`contacts.${userToChatId}`]: 0 } });
-        } else {
-            await User.findByIdAndUpdate(myId, { $set: { [`contacts.${userToChatId}`]: -1 } });
+        const currentContact = user.contacts.get(userToChatId);
+
+        if (currentContact) { // Only update if contact exists
+            const newMessageCount = user.settings.sendReadReceipts ? 0 : -1;
+            await User.findByIdAndUpdate(myId,
+                {
+                    $set: {
+                        [`contacts.${userToChatId}.messageCount`]: newMessageCount
+                    }
+                }
+            );
         }
 
-        res.status(200).json(messages)
+        res.status(200).json(messages);
     } catch (error) {
         console.log("Error in getMessages", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -103,48 +108,47 @@ export const sendMessage = async (req, res) => {
         const receiver = await User.findById(receiverId);
 
 
-        if (!receiver.contacts || !receiver.contacts.get(senderId.toString())) {
-            // Create the field if it doesn't exist
-            if (req.user.settings.sendReadReceipts) {
-                await User.findByIdAndUpdate(
-                    receiverId,
-                    { $set: { [`contacts.${senderId}`]: 0 } },
-                    { new: true }
-                )
-            } else {
-                await User.findByIdAndUpdate(
-                    receiverId,
-                    { $set: { [`contacts.${senderId}`]: -1 } },
-                    { new: true }
-                )
-            }
+        // update the timestamp of the sender so that the contact with the receiver is moved to the top
+        await User.findByIdAndUpdate(senderId, { $set: { [`contacts.${receiverId}.timestamp`]: Date.now() } });
 
-        }
-        console.log(receiver.contacts.get(senderId.toString()))
-        if (receiver.contacts.get(senderId.toString()) === -1) {
+        const contactData = receiver.contacts.get(senderId.toString());
+        if (!contactData) {
+            // Handle case where contactData is undefined
+            const initialValue = {
+                messageCount: 1,
+                timestamp: Date.now()
+            };
             await User.findByIdAndUpdate(
                 receiverId,
-                { $set: { [`contacts.${senderId}`]: 1 } },
+                { $set: { [`contacts.${senderId}`]: initialValue } },
                 { new: true }
-            )
+
+            );
         } else {
+            const currentCount = parseInt(contactData.messageCount) || 0;
+            const newCount = currentCount === -1 ? 1 : currentCount + 1;
             await User.findByIdAndUpdate(
                 receiverId,
-                { $inc: { [`contacts.${senderId}`]: 1 } },
+                {
+                    $set: {
+                        [`contacts.${senderId}`]: {
+                            messageCount: newCount,
+                            timestamp: Date.now()
+                        }
+                    }
+                },
                 { new: true }
-            )
+            );
         }
 
 
-        //  realtime functionality goes here => socket.io
         const receiverSocketId = getReceiverSocketId(receiverId);
         if (receiverSocketId) {
+            // a newMessage event is emitted to the receiver so that the message can be displayed without refreshing the page
             io.to(receiverSocketId).emit("newMessage", newMessage)
         }
 
         res.status(201).json(newMessage)
-
-
 
     } catch (error) {
         console.log("Error in sendMessage controller", error);
@@ -157,17 +161,24 @@ export const getUnReadMessagesCount = async (req, res) => {
         const { selectedContactId } = req.params;
         const userId = req.user._id
 
+        // this finds the amount of unread messages for the selected user
+        // this is used to determine if the receiver has read the messages or not and this function is called 
+        // by the use wanting to know the read status : the sender
+
+        // a use sent a message -> if the receiver opened the message this count will be 0 : otherwise the count will be the amount of unread messages
+
         const user = await User.findById(selectedContactId, { [`contacts.${userId}`]: 1 });
 
-        const unreadMessagesCount = user.contacts.get(userId.toString()) || 0;
-        res.status(200).json(unreadMessagesCount)
+        const contactData = user.contacts?.get(userId.toString());
+        const unreadMessagesCount = contactData?.messageCount || 0;
+
+        res.status(200).json(unreadMessagesCount);
 
     } catch (error) {
-        console.log("Error in getReadState", error)
-        res.status(500)
+        console.log("Error in getUnReadMessagesCount", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-
-}
+};
 
 
 

@@ -34,6 +34,16 @@ const userSChema = new mongoose.Schema(
         },
         contacts: {
             type: Map,
+            of: {
+                messageCount: {
+                    type: Number,
+                    default: 0
+                },
+                timestamp: {
+                    type: Number,
+                    default: 0
+                }
+            }
         },
         profilePic: {
             type: String,
@@ -51,6 +61,11 @@ const userSChema = new mongoose.Schema(
         },
         settings: {
             type: settingsSchema,
+            default: {
+                sendReadReceipts: true,
+                sendTypingIndicators: true,
+                showOnline: true
+            },
         }
     },
     { timestamps: true }

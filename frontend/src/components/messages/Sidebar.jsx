@@ -4,6 +4,7 @@ import AddContact from './AddContact'
 import { Users } from 'lucide-react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useChatStore } from '../../store/useChatStore'
+import { formatMessageTimestampForSidebar } from '../../lib/utils'
 
 const Sidebar = () => {
     const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages, subscribeToTyping, unsubscribeFromTyping } = useChatStore()
@@ -87,12 +88,16 @@ const Sidebar = () => {
                                 </div>
                             </div>
                             { }
-
+                            {contact.lastMessageTimestamp &&
+                                <time className="text-xs text-zinc-500 ml-auto ">
+                                    {formatMessageTimestampForSidebar(contact.lastMessageTimestamp)}
+                                </time>
+                            }
                             {contact.isTyping ? <div className="ml-auto typing-indicator mt-1">
                                 <span className="dot"></span>
                                 <span className="dot"></span>
                                 <span className="dot"></span>
-                            </div> : contact.newMessages > 0 && <div className="ml-auto badge badge-primary size-5">{contact.newMessages}</div>}
+                            </div> : contact.newMessages > 0 && <div className=" badge badge-primary size-5">{contact.newMessages}</div>}
                         </button>
                     ))}
 

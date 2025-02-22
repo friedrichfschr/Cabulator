@@ -59,7 +59,9 @@ const MessageInput = () => {
 
     useEffect(() => {
         const handleStartTyping = () => {
-            socket.emit("startTyping", selectedContact._id, authUser._id);
+            if (authUser.settings.sendTypingIndicators) {
+                socket.emit("startTyping", selectedContact._id, authUser._id);
+            }
         };
 
         const handleStopTyping = () => {

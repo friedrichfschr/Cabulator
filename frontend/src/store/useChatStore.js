@@ -29,6 +29,7 @@ export const useChatStore = create((set, get) => (
 
             } catch (error) {
                 toast.error("Internal Server Error")
+                console.log("error in getting read state: ", error)
             }
         },
 
@@ -46,7 +47,8 @@ export const useChatStore = create((set, get) => (
                     set({ filteredUsers: res.data })
                 };
             } catch (error) {
-
+                toast.error("Internal Server Error")
+                console.log("error in searching users: ", error)
             } finally {
                 set({ isUsersLoading: false })
             }
@@ -59,6 +61,7 @@ export const useChatStore = create((set, get) => (
                 if (res.data) set({ users: res.data })
             } catch (error) {
                 toast.error("Internal Server Error")
+                console.log("error in getting users: ", error)
             } finally {
                 set({ isUsersLoading: false })
             }
@@ -73,21 +76,21 @@ export const useChatStore = create((set, get) => (
 
             } catch (error) {
                 toast.error("Internal Server Error")
-                console.log(error)
+                console.log("error in setting contact: ", error)
             }
         },
 
         getContacts: async () => {
-            const { selectedContact } = get()
             set({ isContactsLoading: true });
 
             try {
                 const res = await axiosInstance.get("/auth/contacts")
                 if (res.data) set({ contacts: res.data })
                 else set({ contacts: [] })
+                return res.data
             } catch (error) {
                 toast.error("Internal Server Error")
-                console.log(error)
+                console.log("error in getting contacts: ", error)
 
             } finally {
                 set({ isContactsLoading: false })
@@ -103,7 +106,7 @@ export const useChatStore = create((set, get) => (
 
             } catch (error) {
                 toast.error("Internal Server Error")
-                console.log(error)
+                console.log("error in getting message: ", error)
             } finally {
                 set({ isMessagesLoading: false })
             }
@@ -114,7 +117,6 @@ export const useChatStore = create((set, get) => (
 
             const { selectedContact, messages } = get()
             try {
-
                 messageData.receiverId = selectedContact._id
                 messageData.senderId = useAuthStore.getState().authUser._id
                 const now = new Date().toISOString()
@@ -129,41 +131,64 @@ export const useChatStore = create((set, get) => (
 
             } catch (error) {
                 toast.error(error);
+                console.log("error in sending message: ", error)
             }
         },
 
         subscribeToMessages: () => {
             const socket = useAuthStore.getState().socket;
 
-            // this both updates the chatcontent if a new message is sent in real time and also increments the unread Messages count
             socket.on("newMessage", (newMessage) => {
-                const { selectedContact, contacts, messages } = get();
+                const { selectedContact, contacts, messages, getContacts } = get();
 
-                // Only update the messages if the sender is the currently selected contact
+                // Handle messages from currently selected contact
                 if (newMessage.senderId === selectedContact?._id) {
                     set({
                         messages: [...messages, newMessage],
                     });
 
-                    // sends to the selectedUser that the message was instantly read while the chat was open
-                    const authUser = useAuthStore.getState().authUser
+                    const authUser = useAuthStore.getState().authUser;
                     if (useSettingsStore.getState().settings.sendReadReceipts) {
-                        socket.emit("markAsRead", selectedContact._id, authUser._id)
+                        socket.emit("markAsRead", selectedContact._id, authUser._id);
                     }
-                }
-
-                else {
-                    // Increment the newMessages counter for the sender
+                } else {
+                    let newMessageSenderIsContact = false;
                     const updatedContacts = contacts.map((contact) => {
                         if (contact._id === newMessage.senderId) {
-                            return { ...contact, newMessages: (contact.newMessages || 0) + 1 };
-
+                            newMessageSenderIsContact = true;
+                            return {
+                                ...contact,
+                                newMessages: (contact.newMessages || 0) + 1,
+                                lastMessageTimestamp: Date.now()
+                            };
                         }
                         return contact;
                     });
-                    set({ contacts: updatedContacts });
+
+                    // Handle message from new sender (not in contacts)
+                    if (!newMessageSenderIsContact) {
+                        getContacts().then(() => {
+                            console.log("in then")
+                            const newContact = get().contacts.find((contact) => contact._id === newMessage.senderId);
+                            if (newContact) {
+                                newContact.newMessages = 1;
+                            }
+                            const sortedContacts = [...updatedContacts, newContact].sort((a, b) =>
+                                (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0)
+                            );
+                            set({ contacts: sortedContacts });
+
+                        });
+
+                    } else {
+                        // Sort and update existing contacts
+                        const sortedContacts = [...updatedContacts].sort((a, b) =>
+                            (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0)
+                        );
+                        set({ contacts: sortedContacts });
+                    }
                 }
-            })
+            });
         },
 
         unsubscribeFromMessages: () => {
@@ -175,7 +200,6 @@ export const useChatStore = create((set, get) => (
             const { socket, authUser } = useAuthStore.getState();
             const { selectedContact } = get()
             socket.on("messageRead", (readBy) => {
-                console.log(authUser.settings.sendReadReceipts)
                 if ((selectedContact._id == readBy) && (authUser.settings.sendReadReceipts == true)) {
                     set({ isRead: true })
                 }
@@ -190,8 +214,9 @@ export const useChatStore = create((set, get) => (
         subscribeToTyping: () => {
             const socket = useAuthStore.getState().socket;
             const { selectedContact, contacts } = get()
+            const { authUser } = useAuthStore.getState()
             socket.on("startTyping", (senderId) => {
-                if (selectedContact?._id == senderId) {
+                if ((selectedContact?._id == senderId) && (authUser.settings.sendTypingIndicators == true)) {
                     set({ isTyping: true })
                 } else {
                     set({ contacts: contacts.map((contact) => contact._id === senderId ? { ...contact, isTyping: true } : contact) })

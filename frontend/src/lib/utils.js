@@ -13,3 +13,17 @@ export function formatDate(date) {
     if (isYesterday(date)) return "Yesterday";
     return format(date, 'MMMM d, yyyy');
 }
+
+export const formatMessageTimestampForSidebar = (timestamp) => {
+    if (!timestamp) return "";
+
+    const messageDate = new Date(timestamp);
+
+    if (isToday(messageDate)) {
+        return format(messageDate, 'HH:mm');
+    } else if (isYesterday(messageDate)) {
+        return "Yesterday";
+    } else {
+        return format(messageDate, 'MMM d');
+    }
+};

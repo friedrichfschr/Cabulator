@@ -3,6 +3,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
+import Message from "../models/message.model.js";
 
 export const signup = async (req, res) => {
 
@@ -16,8 +17,10 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         };
 
-        const user = await User.findOne({ email });
+        let user = await User.findOne({ email });
         if (user) return res.status(400).json({ message: "Email already exists" });
+        user = await User.findOne({ Username });
+        if (user) return res.status(400).json({ message: "Username already exists" });
 
         console.log(req.body)
         const salt = await bcrypt.genSalt(10)
@@ -66,18 +69,15 @@ export const login = async (req, res) => {
         };
 
         generateToken(user._id, res)
-        res.status(200).json({
-            _id: user._id,
-            Username: user.Username,
-            email: user.email,
-            profilePic: user.profilePic,
-        });
+
+        const userWithoutPassword = user.toObject()
+        delete userWithoutPassword.password
+
+        res.status(200).json(userWithoutPassword);
     } catch (error) {
         console.log("Error in login controller", error.message)
         res.status(500).json({ message: "Internal Server Error" })
     }
-
-
 };
 
 export const logout = (req, res) => {
@@ -134,29 +134,32 @@ export const checkAuth = (req, res) => {
         console.log("Error in checkAuth controller", error.message)
         res.status(500).json({ message: "Internal Server Error" })
     }
-}
+};
 
 export const getContacts = async (req, res) => {
     try {
-
-        // check if there are any contacts to get
-        if (!req.user.contacts) return res.status(200).json(null)
+        if (!req.user.contacts) return res.status(200).json(null);
 
         const contactIds = Array.from(req.user.contacts.keys());
-
         const contactUsers = await User.find({ "_id": { "$in": contactIds } }).select("-password");
 
-        const contactsWithNewMessages = contactUsers.map(user => ({
-            _id: user._id,
-            Username: user.Username,
-            email: user.email,
-            profilePic: user.profilePic,
-            newMessages: req.user.contacts.get(user._id.toString())
-        }));
+        const contactsWithNewMessages = contactUsers.map(user => {
+            const contactData = req.user.contacts.get(user._id.toString());
+            return {
+                _id: user._id,
+                Username: user.Username,
+                email: user.email,
+                profilePic: user.profilePic,
+                newMessages: contactData?.messageCount || 0,
+                lastMessageTimestamp: contactData?.timestamp || 0
+            };
+        });
 
+        const sortedContacts = contactsWithNewMessages.sort((a, b) =>
+            b.lastMessageTimestamp - a.lastMessageTimestamp
+        );
 
-
-        res.status(200).json(contactsWithNewMessages);
+        res.status(200).json(sortedContacts);
     } catch (error) {
         console.error("Error in getContacts", error.message);
         res.status(500).json({ message: "Internal Server Error" });
@@ -165,10 +168,31 @@ export const getContacts = async (req, res) => {
 
 export const setContact = async (req, res) => {
     try {
-        const loggedInUserId = req.user._id
+        const loggedInUserId = req.user._id;
         const { id: contactId } = req.params;
 
-        const updatedUser = await User.findByIdAndUpdate(loggedInUserId, { $set: { [`contacts.${contactId}`]: 0 } }, { new: true })
+        // Get the last message between these users
+        const lastMessage = await Message.findOne({
+            $or: [
+                { senderId: loggedInUserId, receiverId: contactId },
+                { senderId: contactId, receiverId: loggedInUserId }
+            ]
+        }).sort({ createdAt: -1 });
+
+        const timestamp = lastMessage ? new Date(lastMessage.createdAt).getTime() : Date.now();
+
+        const updatedUser = await User.findByIdAndUpdate(
+            loggedInUserId,
+            {
+                $set: {
+                    [`contacts.${contactId}`]: {
+                        messageCount: 0,
+                        timestamp: timestamp
+                    }
+                }
+            },
+            { new: true }
+        );
 
         res.status(200).json(updatedUser);
     } catch (error) {
@@ -197,7 +221,6 @@ export const updateSettings = async (req, res) => {
         const { sendReadReceipts, sendTypingIndicators, showOnline } = req.body;
         const userId = req.user._id;
         const updatedSettings = {};
-        console.log(req.body);
 
         if (sendReadReceipts !== undefined) {
             updatedSettings.sendReadReceipts = sendReadReceipts;
@@ -230,4 +253,4 @@ export const getSettings = async (req, res) => {
         console.log("error in getSettings", error)
         res.status(500).json({ message: "Internal Server Error" })
     }
-}
+};

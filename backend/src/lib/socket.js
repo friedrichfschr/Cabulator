@@ -40,7 +40,11 @@ io.on("connection", (socket) => {
 
         // update the database that the message has been read
         // this is need so that the message will still be shown as read even if the page was reloaded and the read state queried from the DB
-        User.findByIdAndUpdate(readBy, { $set: { [`contacts.${selectedContactId}`]: 0 } }).exec();
+        User.findByIdAndUpdate(readBy, {
+            $set: {
+                [`contacts.${selectedContactId}.messageCount`]: 0
+            }
+        }).exec();
 
     })
 
@@ -48,14 +52,12 @@ io.on("connection", (socket) => {
         const receiverSocketId = getReceiverSocketId(selectedContactId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("startTyping", senderId);
-            console.log("typing")
         }
     })
     socket.on("stopTyping", (selectedContactId, senderId) => {
         const receiverSocketId = getReceiverSocketId(selectedContactId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("stopTyping", senderId);
-            console.log("stopped typing")
 
         }
     })
