@@ -2,6 +2,7 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore"
+import { useSettingsStore } from "./useSettingsStore";
 
 export const useChatStore = create((set, get) => (
     {
@@ -19,9 +20,12 @@ export const useChatStore = create((set, get) => (
 
 
         getReadState: async (selectedContact) => {
+            const { authUser } = useAuthStore.getState();
             try {
                 const res = await axiosInstance.get(`/messages/getUnreadCount/${selectedContact}`)
-                set({ isRead: (res.data == 0) })
+                if (authUser.settings.sendReadReceipts == true) {
+                    set({ isRead: (res.data === 0) })
+                }
 
             } catch (error) {
                 toast.error("Internal Server Error")
@@ -143,7 +147,9 @@ export const useChatStore = create((set, get) => (
 
                     // sends to the selectedUser that the message was instantly read while the chat was open
                     const authUser = useAuthStore.getState().authUser
-                    socket.emit("markAsRead", selectedContact._id, authUser._id)
+                    if (useSettingsStore.getState().settings.sendReadReceipts) {
+                        socket.emit("markAsRead", selectedContact._id, authUser._id)
+                    }
                 }
 
                 else {
@@ -166,10 +172,11 @@ export const useChatStore = create((set, get) => (
         },
 
         subscribeToRead: () => {
-            const socket = useAuthStore.getState().socket;
+            const { socket, authUser } = useAuthStore.getState();
             const { selectedContact } = get()
             socket.on("messageRead", (readBy) => {
-                if (selectedContact._id == readBy) {
+                console.log(authUser.settings.sendReadReceipts)
+                if ((selectedContact._id == readBy) && (authUser.settings.sendReadReceipts == true)) {
                     set({ isRead: true })
                 }
             })
@@ -214,7 +221,9 @@ export const useChatStore = create((set, get) => (
                 const socket = useAuthStore.getState().socket;
                 // sends to the selectedUser that the message was read after loading the messages
                 const authUser = useAuthStore.getState().authUser
-                socket.emit("markAsRead", selectedContact._id, authUser._id)
+                if (useSettingsStore.getState().settings.sendReadReceipts) {
+                    socket.emit("markAsRead", selectedContact._id, authUser._id)
+                }
                 const { getReadState } = get();
                 getReadState(selectedContact._id)
 

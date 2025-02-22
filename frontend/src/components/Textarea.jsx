@@ -32,7 +32,7 @@ const Textarea = forwardRef(({ givenId, value, onChange, onKeyDown }, ref) => {
                     ref.current = el;
                 }
             }}
-            style={{ wordBreak: "break-word", whiteSpace: "pre-wrap" }}
+            style={{ wordBreak: "break-word", whiteSpace: "pre-wrap", resize: "none" }}
             value={value}
             onChange={onChange}
             onKeyDown={onKeyDown}

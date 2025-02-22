@@ -84,6 +84,9 @@ export const useAuthStore = create((set, get) => ({
         }
 
     },
+    updateSettingsLocally: (settings) => {
+        set({ authUser: { ...get().authUser, settings } })
+    },
     connectSocket: () => {
         const { authUser } = get();
         if (!authUser || get().socket?.connected) return;

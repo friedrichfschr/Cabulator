@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, signup, updateProfile, checkAuth, getContacts, setContact, getUserByUsername } from "../controllers/auth.controller.js";
+import { login, logout, signup, updateProfile, checkAuth, getContacts, setContact, getUserByUsername, updateSettings, getSettings } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -16,6 +16,10 @@ router.get("/contacts", protectRoute, getContacts)
 router.post("/setContact/:id", protectRoute, setContact)
 
 router.get("/users/:username", protectRoute, getUserByUsername)
+
+router.get("/settings", protectRoute, getSettings)
+
+router.put("/settings", protectRoute, updateSettings)
 
 
 export default router;

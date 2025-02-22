@@ -1,14 +1,17 @@
 import mongoose, { Mongoose } from "mongoose";
-const contactSchema = new mongoose.Schema({
-    contactId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
+
+const settingsSchema = new mongoose.Schema({
+    sendReadReceipts: {
+        type: Boolean,
+        default: true,
     },
-    value: {
-        type: Number,
-        required: false,
-        default: 0,
+    sendTypingIndicators: {
+        type: Boolean,
+        default: true,
+    },
+    showOnline: {
+        type: Boolean,
+        default: true,
     }
 }, { _id: false });
 
@@ -45,6 +48,9 @@ const userSChema = new mongoose.Schema(
         },
         speaks: {
             type: [String],
+        },
+        settings: {
+            type: settingsSchema,
         }
     },
     { timestamps: true }

@@ -113,7 +113,7 @@ const ChatContainer = () => {
                                                 alt="Attachment"
                                             />
                                         )}
-                                        {message.text && <p style={{ "wordBreak": "break-all", "whiteSpace": "pre-wrap" }}>{message.text}</p>}
+                                        {message.text && <p style={{ whiteSpace: "pre-wrap", overflowWrap: "break-word" }}>{message.text}</p>}
                                     </div>
                                     <div className='chat-footer'>
                                         {isLastMessage && message.senderId === authUser._id && (

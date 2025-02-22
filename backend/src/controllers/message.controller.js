@@ -65,7 +65,12 @@ export const getMessages = async (req, res) => {
                 { senderId: userToChatId, receiverId: myId },
             ]
         })
-        await User.findByIdAndUpdate(myId, { $set: { [`contacts.${userToChatId}`]: 0 } });
+        const user = await User.findById(myId);
+        if (user.settings.sendReadReceipts) {
+            await User.findByIdAndUpdate(myId, { $set: { [`contacts.${userToChatId}`]: 0 } });
+        } else {
+            await User.findByIdAndUpdate(myId, { $set: { [`contacts.${userToChatId}`]: -1 } });
+        }
 
         res.status(200).json(messages)
     } catch (error) {
@@ -98,20 +103,38 @@ export const sendMessage = async (req, res) => {
         const receiver = await User.findById(receiverId);
 
 
-        if (!receiver.contacts || !receiver.contacts[senderId]) {
+        if (!receiver.contacts || !receiver.contacts.get(senderId.toString())) {
             // Create the field if it doesn't exist
+            if (req.user.settings.sendReadReceipts) {
+                await User.findByIdAndUpdate(
+                    receiverId,
+                    { $set: { [`contacts.${senderId}`]: 0 } },
+                    { new: true }
+                )
+            } else {
+                await User.findByIdAndUpdate(
+                    receiverId,
+                    { $set: { [`contacts.${senderId}`]: -1 } },
+                    { new: true }
+                )
+            }
+
+        }
+        console.log(receiver.contacts.get(senderId.toString()))
+        if (receiver.contacts.get(senderId.toString()) === -1) {
             await User.findByIdAndUpdate(
                 receiverId,
-                { $set: { [`contacts.${senderId}`]: 0 } },
+                { $set: { [`contacts.${senderId}`]: 1 } },
                 { new: true }
-            );
+            )
+        } else {
+            await User.findByIdAndUpdate(
+                receiverId,
+                { $inc: { [`contacts.${senderId}`]: 1 } },
+                { new: true }
+            )
         }
 
-        await User.findByIdAndUpdate(
-            receiverId,
-            { $inc: { [`contacts.${senderId}`]: 1 } },
-            { new: true }
-        );
 
         //  realtime functionality goes here => socket.io
         const receiverSocketId = getReceiverSocketId(receiverId);

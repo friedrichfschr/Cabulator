@@ -1,3 +1,4 @@
+import { set } from "mongoose";
 import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js"
@@ -193,20 +194,40 @@ export const getUserByUsername = async (req, res) => {
 
 export const updateSettings = async (req, res) => {
     try {
-        const { sendReadReceipts, sendTypingIndicators } = req.body;
+        const { sendReadReceipts, sendTypingIndicators, showOnline } = req.body;
         const userId = req.user._id;
         const updatedSettings = {};
+        console.log(req.body);
 
-        if (sendReadReceipts) {
+        if (sendReadReceipts !== undefined) {
             updatedSettings.sendReadReceipts = sendReadReceipts;
         }
+        if (sendTypingIndicators !== undefined) {
+            updatedSettings.sendTypingIndicators = sendTypingIndicators;
+        }
+        if (showOnline !== undefined) {
+            updatedSettings.showOnline = showOnline;
+        }
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedSettings, { new: true });
-
-        res.status(200).json(updatedUser);
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: { settings: updatedSettings } },
+            { new: true }
+        );
+        console.log(updatedUser.settings);
+        res.status(200).json(updatedUser.settings);
     } catch (error) {
-
+        console.log("error in updating settings: ", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
+};
 
-
+export const getSettings = async (req, res) => {
+    try {
+        const settings = req.user.settings;
+        res.status(200).json(settings);
+    } catch {
+        console.log("error in getSettings", error)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
 }
