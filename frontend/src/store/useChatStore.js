@@ -153,12 +153,15 @@ export const useChatStore = create((set, get) => (
                     }
                 } else {
                     let newMessageSenderIsContact = false;
+                    let messageAdder = 1;
                     const updatedContacts = contacts.map((contact) => {
                         if (contact._id === newMessage.senderId) {
                             newMessageSenderIsContact = true;
+                            if (contact.newMessages === -1) messageAdder = 2
+                            else messageAdder = 1
                             return {
                                 ...contact,
-                                newMessages: (contact.newMessages || 0) + 1,
+                                newMessages: (contact.newMessages || 0) + messageAdder,
                                 lastMessageTimestamp: Date.now()
                             };
                         }

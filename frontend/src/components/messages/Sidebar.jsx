@@ -9,7 +9,7 @@ import { formatMessageTimestampForSidebar } from '../../lib/utils'
 const Sidebar = () => {
     const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages, subscribeToTyping, unsubscribeFromTyping } = useChatStore()
 
-    const { onlineUsers } = useAuthStore()
+    const { onlineUsers, authUser } = useAuthStore()
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
     useEffect(() => {
@@ -93,7 +93,7 @@ const Sidebar = () => {
                                     {formatMessageTimestampForSidebar(contact.lastMessageTimestamp)}
                                 </time>
                             }
-                            {contact.isTyping ? <div className="ml-auto typing-indicator mt-1">
+                            {(contact.isTyping && authUser.settings.sendTypingIndicators) ? <div className="ml-auto typing-indicator mt-1">
                                 <span className="dot"></span>
                                 <span className="dot"></span>
                                 <span className="dot"></span>
