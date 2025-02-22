@@ -5,7 +5,7 @@ import ChatHeader from "./ChatHeader"
 import ViewImage from '../viewImage'
 import MessageSkeleton from '../skeletons/MessageSkeleton'
 import { useAuthStore } from '../../store/useAuthStore'
-import { formatMessageTime } from "../../lib/utils";
+import { formatMessageTime, formatDate } from "../../lib/utils";
 
 let saveLastMessageTime = null;
 
@@ -42,7 +42,14 @@ const ChatContainer = () => {
         if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [messages, isTyping]);
+
+    });
+
+    useEffect(() => {
+        if (messageEndRef.current) {
+            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages, isTyping])
 
     if (isMessagesLoading) {
         return (
@@ -64,55 +71,59 @@ const ChatContainer = () => {
                 <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 mt-0 space-y-4'>
                     {messages.map((message, index) => {
                         const isLastMessage = index === messages.length - 1;
-                        const currentMessageTime = formatMessageTime(message.updatedAt)
-                        const lastMessageTime = saveLastMessageTime;
-                        saveLastMessageTime = currentMessageTime
+
+                        const currentMessageDate = new Date(message.updatedAt);
+                        const previousMessageDate = index > 0 ? new Date(messages[index - 1].updatedAt) : null;
+                        const showDate = !previousMessageDate || currentMessageDate.toDateString() !== previousMessageDate.toDateString();
+
                         return (
-                            <div
-                                key={message._id}
-                                className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-                                ref={isLastMessage ? messageEndRef : null}
-                            >
-                                <div className="chat-image avatar">
-                                    <div className="size-10 rounded-full border">
-                                        <img
-                                            src={
-                                                message.senderId === authUser._id
-                                                    ? authUser.profilePic || "/avatar.png"
-                                                    : selectedContact.profilePic || "/avatar.png"
-                                            }
-                                            alt="profile pic"
-                                        />
+                            <React.Fragment key={message._id}>
+                                {showDate && (
+                                    <div className="text-center my-2">
+                                        <span className="badge">{formatDate(currentMessageDate)}</span>
+                                    </div>
+                                )}
+                                <div
+                                    className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                                    ref={isLastMessage ? messageEndRef : null}
+                                >
+                                    <div className="chat-image avatar">
+                                        <div className="size-10 rounded-full border">
+                                            <img
+                                                src={
+                                                    message.senderId === authUser._id
+                                                        ? authUser.profilePic || "/avatar.png"
+                                                        : selectedContact.profilePic || "/avatar.png"
+                                                }
+                                                alt="profile pic"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="chat-header mb-1 ">
+                                        <time className="text-xs opacity-50 ml-1">
+                                            {formatMessageTime(message.updatedAt)}
+                                        </time>
+                                    </div>
+                                    <div className="chat-bubble flex flex-col max-w-120">
+                                        {message.image && (
+                                            <ViewImage
+                                                classes="min-w-20 max-w-full max-h-90 rounded-md mb-1 mt-1 object-contain"
+                                                src={message.image}
+                                                alt="Attachment"
+                                            />
+                                        )}
+                                        {message.text && <p style={{ "wordBreak": "break-all", "whiteSpace": "pre-wrap" }}>{message.text}</p>}
+                                    </div>
+                                    <div className='chat-footer'>
+                                        {isLastMessage && message.senderId === authUser._id && (
+                                            <span className="text-xs text-gray-500 mt-1 ml-2 mb-0">
+                                                {isRead ? "Read" : "Delivered"}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
-
-                                <div className="chat-header mb-1 ">
-                                    <time className="text-xs opacity-50 ml-1">
-
-                                        {!(lastMessageTime == currentMessageTime) && currentMessageTime}
-                                    </time>
-                                </div>
-                                <div className="chat-bubble flex flex-col max-w-120">
-                                    {message.image && (
-
-                                        <ViewImage
-                                            classes="min-w-20 max-w-full max-h-90 rounded-md mb-1 mt-1 object-contain"
-                                            src={message.image}
-                                            alt="Attachment"
-                                        />
-
-                                    )}
-
-                                    {message.text && <p style={{ "wordBreak": "break-all", "whiteSpace": "pre-wrap" }}>{message.text}</p>}
-                                </div>
-                                <div className='chat-footer'>
-                                    {isLastMessage && message.senderId === authUser._id && (
-                                        <span className="text-xs text-gray-500 mt-1 ml-2 mb-0">
-                                            {isRead ? "Read" : "Delivered"}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+                            </React.Fragment>
                         );
                     })}
                     {isTyping && (
