@@ -20,16 +20,36 @@ export function getReceiverSocketId(userId) {
 //used to store online users
 const userSocketMap = {}; // {userId: socketId}
 
-io.on("connection", (socket) => {
+
+// this function is used to get the list of users who have set their showOnline setting to true
+async function getVisibleOnlineUsers() {
+    try {
+        const onlineUserIds = Object.keys(userSocketMap);
+        const users = await User.find({
+            _id: { $in: onlineUserIds },
+            'settings.showOnline': true
+        });
+        return users.map(user => user._id.toString());
+    } catch (error) {
+        console.error("Error getting visible online users:", error);
+        return [];
+    }
+}
+
+io.on("connection", async (socket) => {
     // console.log("A user connected", socket.id);
 
     const userId = socket.handshake.query.userId
     if (userId) {
-        userSocketMap[userId] = socket.id
+        userSocketMap[userId] = socket.id;
+
+
+        // Emit the list of online users to clients
+        const visibleOnlineUsers = await getVisibleOnlineUsers();
+        io.emit("getOnlineUsers", visibleOnlineUsers);
     }
 
-    // io.emit is used to send events to all connected users
-    io.emit("getOnlineUsers", Object.keys(userSocketMap))
+
 
     socket.on("markAsRead", (selectedContactId, readBy) => {
         // Notify the sender that the message has been read

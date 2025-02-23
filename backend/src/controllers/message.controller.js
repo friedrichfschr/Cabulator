@@ -108,15 +108,23 @@ export const sendMessage = async (req, res) => {
         const receiver = await User.findById(receiverId);
 
 
+
         // update the timestamp of the sender so that the contact with the receiver is moved to the top
         await User.findByIdAndUpdate(senderId, { $set: { [`contacts.${receiverId}.timestamp`]: Date.now() } });
+        if (text) {
+            await User.findByIdAndUpdate(senderId, { $set: { [`contacts.${receiverId}.lastMessage`]: text } });
+        }
+        else {
+            await User.findByIdAndUpdate(senderId, { $set: { [`contacts.${receiverId}.lastMessage`]: "Image" } });
+        }
 
-        const contactData = receiver.contacts.get(senderId.toString());
+        const contactData = receiver.contacts?.get(senderId.toString());
         if (!contactData) {
-            // Handle case where contactData is undefined
+            // Handle case where contactData is undefined -> the other user doesn't have the sender as a contact
             const initialValue = {
                 messageCount: 1,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                lastMessage: text || "Image"
             };
             await User.findByIdAndUpdate(
                 receiverId,
@@ -133,7 +141,8 @@ export const sendMessage = async (req, res) => {
                     $set: {
                         [`contacts.${senderId}`]: {
                             messageCount: newCount,
-                            timestamp: Date.now()
+                            timestamp: Date.now(),
+                            lastMessage: text || "Image"
                         }
                     }
                 },

@@ -34,7 +34,7 @@ const userSChema = new mongoose.Schema(
         },
         contacts: {
             type: Map,
-            of: {
+            of: new mongoose.Schema({
                 messageCount: {
                     type: Number,
                     default: 0
@@ -42,8 +42,12 @@ const userSChema = new mongoose.Schema(
                 timestamp: {
                     type: Number,
                     default: 0
+                },
+                lastMessage: {
+                    type: String,
+                    default: ""
                 }
-            }
+            }, { _id: false })
         },
         profilePic: {
             type: String,

@@ -27,3 +27,8 @@ export const formatMessageTimestampForSidebar = (timestamp) => {
         return format(messageDate, 'MMM d');
     }
 };
+
+export const truncateMessage = (message, maxLength = 45) => {
+    if (!message) return '';
+    return message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+};

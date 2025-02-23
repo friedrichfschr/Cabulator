@@ -162,7 +162,8 @@ export const useChatStore = create((set, get) => (
                             return {
                                 ...contact,
                                 newMessages: (contact.newMessages || 0) + messageAdder,
-                                lastMessageTimestamp: Date.now()
+                                lastMessageTimestamp: Date.now(),
+                                lastMessage: newMessage.text || "Image",
                             };
                         }
                         return contact;

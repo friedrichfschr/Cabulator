@@ -4,7 +4,8 @@ import AddContact from './AddContact'
 import { Users } from 'lucide-react'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useChatStore } from '../../store/useChatStore'
-import { formatMessageTimestampForSidebar } from '../../lib/utils'
+import { formatMessageTimestampForSidebar, truncateMessage } from '../../lib/utils'
+import { max } from 'date-fns'
 
 const Sidebar = () => {
     const { getContacts, contacts, selectedContact, setSelectedContact, isContactsLoading, subscribeToMessages, unsubscribeFromMessages, subscribeToTyping, unsubscribeFromTyping } = useChatStore()
@@ -26,11 +27,11 @@ const Sidebar = () => {
         return () => unsubscribeFromTyping();
     })
 
-    const onlineContacts = contacts.filter((contact) => onlineUsers.includes(contact._id))
+    const onlineContacts = contacts.filter((contact) => (onlineUsers.includes(contact._id)));
     const shownContacts = showOnlineOnly ? onlineContacts : contacts;
 
     return (
-        <aside className="grow-1 h-full border-r border-base-300 flex flex-col transition-all duration-200">
+        <div className="grow-1 h-full border-r border-base-300 flex flex-col transition-all duration-200">
             <div className='border-b border-base-300 w-full p-5 flex justify-between items-center'>
                 <div>
                     <Users className='size-6' />
@@ -70,7 +71,7 @@ const Sidebar = () => {
                                 <img
                                     src={contact.profilePic || "/avatar.png"}
                                     alt={contact.name}
-                                    className="size-12 object-cover rounded-full"
+                                    className="size-12 min-w-12 object-cover rounded-full"
                                 />
                                 {onlineUsers.includes(contact._id) && (
                                     <span
@@ -81,19 +82,19 @@ const Sidebar = () => {
                             </div>
 
 
-                            <div className="block text-left min-w-0">
+                            <div className="block text-left shrink-1">
                                 <div className="font-medium truncate">{contact.Username}</div>
-                                <div className="text-sm text-zinc-400">
-                                    {onlineUsers.includes(contact._id) ? "Online" : "Offline"}
+                                <div className="text-sm text-zinc-400" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                                    {truncateMessage(contact.lastMessage)}
                                 </div>
                             </div>
                             { }
                             {contact.lastMessageTimestamp &&
-                                <time className="text-xs text-zinc-500 ml-auto ">
+                                <time className="text-xs text-zinc-500 ml-auto shrink-0">
                                     {formatMessageTimestampForSidebar(contact.lastMessageTimestamp)}
                                 </time>
                             }
-                            {(contact.isTyping && authUser.settings.sendTypingIndicators) ? <div className="ml-auto typing-indicator mt-1">
+                            {(contact.isTyping && authUser.settings.sendTypingIndicators) ? <div className="typing-indicator mt-1">
                                 <span className="dot"></span>
                                 <span className="dot"></span>
                                 <span className="dot"></span>
@@ -106,7 +107,7 @@ const Sidebar = () => {
                     )}
 
                 </div>}
-        </aside >
+        </div >
     )
 }
 

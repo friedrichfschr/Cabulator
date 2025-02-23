@@ -151,7 +151,9 @@ export const getContacts = async (req, res) => {
                 email: user.email,
                 profilePic: user.profilePic,
                 newMessages: contactData?.messageCount || 0,
-                lastMessageTimestamp: contactData?.timestamp || 0
+                lastMessageTimestamp: contactData?.timestamp || 0,
+                lastMessage: contactData?.lastMessage || "",
+                showOnline: user.settings.showOnline
             };
         });
 
@@ -180,6 +182,7 @@ export const setContact = async (req, res) => {
         }).sort({ createdAt: -1 });
 
         const timestamp = lastMessage ? new Date(lastMessage.createdAt).getTime() : Date.now();
+        const text = lastMessage ? lastMessage.text : "";
 
         const updatedUser = await User.findByIdAndUpdate(
             loggedInUserId,
@@ -187,7 +190,8 @@ export const setContact = async (req, res) => {
                 $set: {
                     [`contacts.${contactId}`]: {
                         messageCount: 0,
-                        timestamp: timestamp
+                        timestamp: timestamp,
+                        lastMessage: text
                     }
                 }
             },
