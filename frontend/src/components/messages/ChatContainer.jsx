@@ -7,17 +7,47 @@ import MessageSkeleton from '../skeletons/MessageSkeleton'
 import { useAuthStore } from '../../store/useAuthStore'
 import { formatMessageTime, formatDate } from "../../lib/utils";
 
-let saveLastMessageTime = null;
-
 const ChatContainer = () => {
     const { selectedContact,
         messages, getMessages, isMessagesLoading,
         subscribeToMessages, unsubscribeFromMessages,
         getReadState, subscribeToRead, unsubscribeFromRead, isRead,
-        subscribeToTyping, unsubscribeFromTyping, isTyping
+        subscribeToTyping, unsubscribeFromTyping, isTyping,
+        hasMoreMessages, isLoadingMore, loadMoreMessages
     } = useChatStore()
 
     const { authUser } = useAuthStore();
+
+    const messagesContainerRef = useRef(null);
+    const previousMessagesLength = useRef(messages.length);
+    const isInitialLoad = useRef(true); // Add this ref for tracking initial load
+
+    const scrollToBottom = () => {
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        if (!isLoadingMore) {
+            if (isInitialLoad.current) {
+                // Scroll on initial load
+                scrollToBottom();
+                isInitialLoad.current = false;
+            } else {
+                // Only scroll if a new message was added (not when loading older messages)
+                const isNewMessage = messages.length === previousMessagesLength.current + 1;
+                if (isNewMessage) {
+                    scrollToBottom();
+                }
+            }
+        }
+        previousMessagesLength.current = messages.length;
+    }, [messages, isLoadingMore]);
+
+    useEffect(() => {
+        isInitialLoad.current = true;
+    }, [selectedContact._id]);
 
     useEffect(() => {
         getReadState(selectedContact._id);
@@ -36,20 +66,13 @@ const ChatContainer = () => {
         return () => unsubscribeFromTyping();
     }, [subscribeToTyping, unsubscribeFromTyping])
 
-    const messageEndRef = useRef(null);
 
-    useEffect(() => {
-        if (messageEndRef.current) {
-            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    const handleScroll = (e) => {
+        const { scrollTop } = e.target;
+        if (scrollTop < 100 && hasMoreMessages && !isLoadingMore) {
+            loadMoreMessages();
         }
-
-    });
-
-    useEffect(() => {
-        if (messageEndRef.current) {
-            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [messages, isTyping])
+    };
 
     if (isMessagesLoading) {
         return (
@@ -68,7 +91,16 @@ const ChatContainer = () => {
             </div>
 
             {messages.length > 0 ? (
-                <div className='flex-1 overflow-y-auto overflow-x-hidden m-4 mt-0 space-y-4'>
+                <div
+                    ref={messagesContainerRef}
+                    className='flex-1 overflow-y-auto overflow-x-hidden m-4 mt-0 space-y-4'
+                    onScroll={handleScroll}
+                >
+                    {isLoadingMore && (
+                        <div className="text-center">
+                            <span className="loading loading-spinner"></span>
+                        </div>
+                    )}
                     {messages.map((message, index) => {
                         const isLastMessage = index === messages.length - 1;
 
@@ -85,7 +117,7 @@ const ChatContainer = () => {
                                 )}
                                 <div
                                     className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-                                    ref={isLastMessage ? messageEndRef : null}
+
                                 >
                                     <div className="chat-image avatar">
                                         <div className="size-10 rounded-full border">

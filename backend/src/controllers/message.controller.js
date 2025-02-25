@@ -55,29 +55,49 @@ export const getMessages = async (req, res) => {
     try {
         const { id: userToChatId } = req.params;
         const myId = req.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
 
-        const messages = await Message.find({
+        // Get total count for pagination info
+        const totalMessages = await Message.countDocuments({
             $or: [
                 { senderId: myId, receiverId: userToChatId },
                 { senderId: userToChatId, receiverId: myId },
             ]
         });
 
+        // Get messages with pagination, sorted by newest first
+        const messages = await Message.find({
+            $or: [
+                { senderId: myId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: myId },
+            ]
+        })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Update read status as before
         const user = await User.findById(myId);
         const currentContact = user.contacts.get(userToChatId);
 
-        if (currentContact) { // Only update if contact exists
+        if (currentContact) {
             const newMessageCount = user.settings.sendReadReceipts ? 0 : -1;
-            await User.findByIdAndUpdate(myId,
-                {
-                    $set: {
-                        [`contacts.${userToChatId}.messageCount`]: newMessageCount
-                    }
-                }
-            );
+            await User.findByIdAndUpdate(myId, {
+                $set: { [`contacts.${userToChatId}.messageCount`]: newMessageCount }
+            });
         }
 
-        res.status(200).json(messages);
+        res.status(200).json({
+            messages: messages.reverse(), // Reverse to show oldest first
+            pagination: {
+                total: totalMessages,
+                page,
+                limit,
+                hasMore: totalMessages > skip + limit
+            }
+        });
     } catch (error) {
         console.log("Error in getMessages", error);
         res.status(500).json({ message: "Internal Server Error" });

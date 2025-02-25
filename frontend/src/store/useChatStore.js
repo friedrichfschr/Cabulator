@@ -17,7 +17,9 @@ export const useChatStore = create((set, get) => (
         searchString: "",
         isRead: false,
         isTyping: false,
-
+        hasMoreMessages: true,
+        currentPage: 1,
+        isLoadingMore: false,
 
         getReadState: async (selectedContact) => {
             const { authUser } = useAuthStore.getState();
@@ -97,21 +99,50 @@ export const useChatStore = create((set, get) => (
             }
         },
 
-        getMessages: async (selectedContactId) => {
-            if (!selectedContactId) return;
-            const { getReadState } = get();
-            set({ isMessagesLoading: true });
-            try {
-                const res = await axiosInstance.get(`/messages/${selectedContactId}`)
-                set({ messages: res.data });
+        getMessages: async (selectedContactId, page = 1) => {
+            if (page === 1) {
+                set({ isMessagesLoading: true });
+            } else {
+                set({ isLoadingMore: true });
+            }
 
+            try {
+                const res = await axiosInstance.get(
+                    `/messages/${selectedContactId}?page=${page}&limit=30`
+                );
+
+                if (page === 1) {
+                    set({
+                        messages: res.data.messages,
+                        hasMoreMessages: res.data.pagination.hasMore,
+                        currentPage: page
+                    });
+                } else {
+                    set(state => ({
+                        messages: [...res.data.messages, ...state.messages],
+                        hasMoreMessages: res.data.pagination.hasMore,
+                        currentPage: page
+                    }));
+                }
             } catch (error) {
-                toast.error("Internal Server Error")
-                console.log("error in getting message: ", error)
+                toast.error("Error loading messages");
+                console.log("error in getting message: ", error);
             } finally {
-                set({ isMessagesLoading: false })
+                set({
+                    isMessagesLoading: false,
+                    isLoadingMore: false
+                });
             }
         },
+
+        loadMoreMessages: async () => {
+            const { selectedContact, currentPage, hasMoreMessages, isLoadingMore } = get();
+
+            if (!hasMoreMessages || isLoadingMore) return;
+
+            await get().getMessages(selectedContact._id, currentPage + 1);
+        },
+
         sendMessage: async (messageData) => {
 
             // set's the message footer to "delivered"
