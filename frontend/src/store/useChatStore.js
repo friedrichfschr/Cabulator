@@ -98,6 +98,7 @@ export const useChatStore = create((set, get) => (
         },
 
         getMessages: async (selectedContactId) => {
+            if (!selectedContactId) return;
             const { getReadState } = get();
             set({ isMessagesLoading: true });
             try {

@@ -6,6 +6,7 @@ export const useDeckStore = create((set, get) => ({
     decks: [],
     selectedDeck: null,
     setSelectedDeck: (deck) => set({ selectedDeck: deck }),
+    dueCards: [],
 
     addDeck: async (deck) => {
         try {
@@ -54,6 +55,17 @@ export const useDeckStore = create((set, get) => ({
         } catch (error) {
             console.log("Error in getting Deck", error)
             toast.error(error.response.data.message)
+        }
+    },
+
+    getDueCards: async (deckId) => {
+        try {
+            const res = await axiosInstance.get(`/decks/due-cards/${deckId}`);
+            set({ dueCards: res.data });
+            return res.data;
+        } catch (error) {
+            console.error("Error in getting due cards:", error);
+            toast.error(error.response?.data?.message || 'Failed to get due cards');
         }
     },
 

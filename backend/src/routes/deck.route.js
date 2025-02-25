@@ -1,6 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { createDeck, createFlashcard, deleteDeck, deleteFlashcard, getDecks, getFlashcards, updateDeck, updateFlashcard } from "../controllers/deck.controller.js";
+import { createDeck, createFlashcard, deleteDeck, deleteFlashcard, getDecks, getFlashcards, updateDeck, updateFlashcard, getDueCards } from "../controllers/deck.controller.js";
 
 
 const router = express.Router();
@@ -9,6 +9,7 @@ router.post("/create", protectRoute, createDeck)
 router.put("/update/:deckId", protectRoute, updateDeck)
 router.delete("/delete/:deckId", protectRoute, deleteDeck)
 router.get("/", protectRoute, getDecks)
+router.get("/due-cards/:deckId", protectRoute, getDueCards)
 
 router.post("/flashcards/create/:deckId", protectRoute, createFlashcard)
 router.put("/flashcards/update/:flashcardId", protectRoute, updateFlashcard)

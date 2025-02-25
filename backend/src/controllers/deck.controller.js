@@ -44,7 +44,12 @@ export const updateDeck = async (req, res) => {
         if (!updatedDeckInDB) {
             return res.status(404).json({ message: "Deck not found" })
         }
-        res.status(200).json(updatedDeckInDB)
+        const dueCardsCount = await Flashcard.countDocuments({
+            deckId: updatedDeckInDB._id,
+            nextReview: { $lte: new Date() }
+        });
+        const deckWithDueCount = { ...updatedDeckInDB.toObject(), dueCardsCount };
+        res.status(200).json(deckWithDueCount)
 
     } catch (error) {
         console.log("error in updating deck", error)
@@ -74,12 +79,41 @@ export const deleteDeck = async (req, res) => {
 export const getDecks = async (req, res) => {
     try {
         const decks = await Deck.find({ owner: req.user._id })
-        res.status(200).json(decks)
+        const decksWithDueCount = await Promise.all(decks.map(async (deck) => {
+            const dueCardsCount = await Flashcard.countDocuments({
+                deckId: deck._id,
+                nextReview: { $lte: new Date() }
+            });
+
+            return {
+                ...deck.toObject(),
+                dueCardsCount
+            };
+        }));
+
+        res.status(200).json(decksWithDueCount)
     } catch (error) {
         console.log("Error in getting Deck", error)
         res.status(500).json({ message: "Internal Server Error" })
     }
 }
+
+export const getDueCards = async (req, res) => {
+    const { deckId } = req.params;
+
+    try {
+        const dueCards = await Flashcard.find({
+            deckId,
+            nextReview: { $lte: new Date() }
+        });
+
+        res.status(200).json(dueCards);
+    } catch (error) {
+        console.log("Error in getting due cards", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 
 export const createFlashcard = async (req, res) => {
     const { word, translation, definition, comment } = req.body;

@@ -94,8 +94,9 @@ const DecksPage = () => {
         setCards(filteredCards)
     }
     useEffect(() => {
-        getDecks()
-    }, [getDecks])
+        if (!selectedDeck) getDecks()
+        console.log("test")
+    }, [selectedDeck, getDecks])
 
     return (
         <div className="h-100dvh bg-base-200 overflow-hidden w-full">
@@ -211,15 +212,17 @@ const DecksPage = () => {
                             </button>
 
                             {/* deck list */}
-                            <div className='flex flex-col w-full max-w-6xl p-4 bg-base-300 mt-6 rounded-xl'>
+                            <div className='flex flex-col w-full max-w-6xl p-4  mt-6 rounded-xl items-center'>
                                 {(decks.length === 0) && <div className=' text-zinc-500 mt-10 animate-pulse'>Create a deck to get started!</div>}
                                 {decks.map(deck => (
                                     <div key={deck._id} className="flex justify-between w-full rounded-xl px-4 my-2 hover:bg-base-200" style={{ backgroundColor: deck.color }}>
                                         {/* left */}
                                         <button onClick={() => {
                                             handleDeckSelect(deck)
-                                        }} className="w-full flex items-center">
+                                        }} className="w-full flex items-center justify-between">
                                             <h2 className="text-lg font-semibold">{deck.title}</h2>
+                                            <span className='font-bold '>{deck.dueCardsCount}</span>
+
                                         </button>
                                         {/* right */}
                                         <div className="flex items-center ml-10">
