@@ -69,7 +69,7 @@ const ChatContainer = () => {
 
     const handleScroll = (e) => {
         const { scrollTop } = e.target;
-        if (scrollTop < 100 && hasMoreMessages && !isLoadingMore) {
+        if (scrollTop < 50 && hasMoreMessages && !isLoadingMore) {
             loadMoreMessages();
         }
     };
