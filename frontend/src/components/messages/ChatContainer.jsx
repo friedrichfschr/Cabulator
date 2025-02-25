@@ -21,6 +21,7 @@ const ChatContainer = () => {
     const messagesContainerRef = useRef(null);
     const previousMessagesLength = useRef(messages.length);
     const isInitialLoad = useRef(true); // Add this ref for tracking initial load
+    const lastFirstMessageRef = useRef(null); // Track the message that was first in view
 
     const scrollToBottom = () => {
         if (messagesContainerRef.current) {
@@ -39,6 +40,13 @@ const ChatContainer = () => {
                 const isNewMessage = messages.length === previousMessagesLength.current + 1;
                 if (isNewMessage) {
                     scrollToBottom();
+                } else if (messages.length > previousMessagesLength.current) {
+                    // Find the height added by new messages
+                    const oldFirstMessage = messages[messages.length - previousMessagesLength.current];
+                    const messageElement = document.getElementById(oldFirstMessage._id);
+                    if (messageElement) {
+                        messagesContainerRef.current.scrollTop = messageElement.offsetTop;
+                    }
                 }
             }
         }
@@ -116,6 +124,7 @@ const ChatContainer = () => {
                                     </div>
                                 )}
                                 <div
+                                    id={message._id} // Add ID to message div
                                     className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
 
                                 >
