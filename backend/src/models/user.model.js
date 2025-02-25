@@ -57,6 +57,9 @@ const userSChema = new mongoose.Schema(
             type: String,
             default: ""
         },
+        hobbies: {
+            type: [String],
+        },
         learns: {
             type: [String],
         },

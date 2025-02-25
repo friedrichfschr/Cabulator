@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useAuthStore } from '../store/useAuthStore'
-import { Camera, Languages, Mail, ScrollText, User } from 'lucide-react'
+import { Camera, Languages, Mail, ScrollText, Star, User } from 'lucide-react'
 import Select from 'react-select';
+import { languagesOptions } from '../constants/languages.constant.js';
+import { hobbiesOptions } from '../constants/hobbies.constant.js';
 
 const customSelectStyles = {
     control: (provided) => ({
@@ -36,15 +38,7 @@ const customSelectStyles = {
     }),
 };
 
-const languagesOptions = [
-    { value: 'English', label: 'English' },
-    { value: 'Spanish', label: 'Spanish' },
-    { value: 'French', label: 'French' },
-    { value: 'German', label: 'German' },
-    { value: 'Chinese', label: 'Chinese' },
-    { value: 'Japanese', label: 'Japanese' },
-    // Add more languages as needed
-];
+
 
 const EditProfilePage = () => {
 
@@ -54,6 +48,8 @@ const EditProfilePage = () => {
     const [newBio, setNewBio] = useState(authUser?.bio || '');
     const [selectedFluentLanguages, setSelectedFluentLanguages] = useState(authUser?.speaks || []);
     const [selectedStudiedLanguages, setSelectedStudiedLanguages] = useState(authUser?.learns || []);
+    const [selectedHobbies, setSelectedHobbies] = useState(authUser?.hobbies || []);
+
 
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
@@ -70,7 +66,10 @@ const EditProfilePage = () => {
     };
 
     const handleSave = async () => {
-        await updateProfile({ Username: newUsername, bio: newBio, speaks: selectedFluentLanguages, learns: selectedStudiedLanguages });
+        await updateProfile({
+            Username: newUsername, bio: newBio, speaks: selectedFluentLanguages, learns: selectedStudiedLanguages,
+            hobbies: selectedHobbies
+        });
         setIsEditing(false);
     };
 
@@ -183,6 +182,28 @@ const EditProfilePage = () => {
                         )}
                     </div>
 
+                    {/* Hobbies*/}
+                    <div className="relative space-y-1.5">
+                        <div className="text-sm text-zinc-400 flex items-center gap-2">
+                            <Star className="w-4 h-4" />
+                            Hobbies
+                        </div>
+                        {isEditing ? (
+                            <Select
+                                isMulti
+                                value={selectedHobbies.map(lang => ({ value: lang, label: lang }))}
+                                onChange={(selectedOptions) => setSelectedHobbies(selectedOptions.map(option => option.value))}
+                                options={hobbiesOptions}
+                                className="basic-multi-select "
+                                classNamePrefix="select"
+                                styles={customSelectStyles}
+                            />
+                        ) : (
+                            <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full">
+                                {authUser?.hobbies?.join(', ') || 'none'}
+                            </p>
+                        )}
+                    </div>
 
                     {/* Fluent Languages*/}
                     <div className="relative space-y-1.5">
@@ -202,7 +223,7 @@ const EditProfilePage = () => {
                             />
                         ) : (
                             <p className="px-4 py-2.5 bg-base-300 rounded-lg border w-full">
-                                {authUser?.speaks?.join(', ')}
+                                {authUser?.speaks?.join(', ') || 'none'}
                             </p>
                         )}
                     </div>

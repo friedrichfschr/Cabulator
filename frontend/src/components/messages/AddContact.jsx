@@ -34,7 +34,7 @@ const AddContact = () => {
 
     const shownUsers = clearWholeSearchNext ? filteredUsers : users;
 
-    const handleFormSubmit = async (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
         setSearchString(text);
         setClearWholeSearchNext(true);
@@ -63,7 +63,7 @@ const AddContact = () => {
                     </form>
                     <h3 className="font-bold text-lg">Users</h3>
 
-                    <form className='flex items-center gap-2 mt-4 m-2' onSubmit={handleFormSubmit}>
+                    <form className='flex items-center gap-2 mt-4 m-2' onSubmit={handleSearch}>
                         <input
                             type="text"
                             id="addContactSearch"
@@ -87,7 +87,7 @@ const AddContact = () => {
                             type='submit'
                             className="btn btn-sm btn-circle m-2"
                             disabled={!text.trim()}
-                            onClick={handleFormSubmit}
+                            onClick={handleSearch}
                         >
                             <Search />
                         </button>

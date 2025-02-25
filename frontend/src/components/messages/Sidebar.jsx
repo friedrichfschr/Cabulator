@@ -70,7 +70,7 @@ const Sidebar = () => {
                             <div className=" block relative ">
                                 <img
                                     src={contact.profilePic || "/avatar.png"}
-                                    alt={contact.name}
+                                    alt={contact.Username}
                                     className="size-12 min-w-12 object-cover rounded-full"
                                 />
                                 {onlineUsers.includes(contact._id) && (

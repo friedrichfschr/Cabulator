@@ -107,8 +107,6 @@ export const sendMessage = async (req, res) => {
 
         const receiver = await User.findById(receiverId);
 
-
-
         // update the timestamp of the sender so that the contact with the receiver is moved to the top
         await User.findByIdAndUpdate(senderId, { $set: { [`contacts.${receiverId}.timestamp`]: Date.now() } });
         if (text) {

@@ -1,9 +1,9 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const flashcardSchema = new mongoose.Schema({
 
     // content  
-    vocabulary: {
+    word: {
         type: String, required: true,
     },
     translation: {

@@ -92,7 +92,7 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { profilePic, Username, bio, speaks, learns } = req.body;
+        const { profilePic, Username, bio, speaks, learns, hobbies } = req.body;
         const userId = req.user._id
 
         const updatedprofile = {};
@@ -112,6 +112,9 @@ export const updateProfile = async (req, res) => {
 
         if (bio) {
             updatedprofile.bio = bio;
+        }
+        if (hobbies) {
+            updatedprofile.hobbies = hobbies;
         }
 
         if (speaks) { updatedprofile.speaks = speaks; }

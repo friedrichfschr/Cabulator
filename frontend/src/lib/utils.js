@@ -30,5 +30,6 @@ export const formatMessageTimestampForSidebar = (timestamp) => {
 
 export const truncateMessage = (message, maxLength = 45) => {
     if (!message) return '';
-    return message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+    const singleLine = message.replace(/[\r\n]+/g, ' ').trim();
+    return singleLine.length > maxLength ? singleLine.substring(0, maxLength) + '...' : singleLine;
 };
