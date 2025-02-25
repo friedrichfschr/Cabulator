@@ -22,6 +22,7 @@ const ChatContainer = () => {
     const previousMessagesLength = useRef(messages.length);
     const isInitialLoad = useRef(true); // Add this ref for tracking initial load
     const lastFirstMessageRef = useRef(null); // Track the message that was first in view
+    const scrollTimeout = useRef(null);
 
     const scrollToBottom = () => {
         if (messagesContainerRef.current) {
@@ -74,12 +75,30 @@ const ChatContainer = () => {
         return () => unsubscribeFromTyping();
     }, [subscribeToTyping, unsubscribeFromTyping])
 
+    useEffect(() => {
+        return () => {
+            if (scrollTimeout.current) {
+                clearTimeout(scrollTimeout.current);
+            }
+        };
+    }, []);
 
     const handleScroll = (e) => {
         const { scrollTop } = e.target;
-        if (scrollTop < 50 && hasMoreMessages && !isLoadingMore) {
-            loadMoreMessages();
+
+        // Clear any existing timeout
+        if (scrollTimeout.current) {
+            clearTimeout(scrollTimeout.current);
         }
+
+        // Set a new timeout to check scroll position
+        scrollTimeout.current = setTimeout(() => {
+            if (scrollTop < 50 && hasMoreMessages && !isLoadingMore) {
+                const oldFirstMessage = messages[messages.length - previousMessagesLength.current];
+                lastFirstMessageRef.current = oldFirstMessage?._id;
+                loadMoreMessages();
+            }
+        }, 250); // 250ms delay to prevent multiple rapid loads
     };
 
     if (isMessagesLoading) {
