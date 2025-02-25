@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDeckStore } from '../../store/useDeckStore'
 import { Check, ChevronLeft, EllipsisVertical, Filter } from 'lucide-react'
-import { get, set } from 'mongoose'
 
 const DecksPage = () => {
     const { addDeck, getDecks, decks, editDeck, deleteDeck, selectedDeck, setSelectedDeck, createFlashcard, getCards } = useDeckStore()
